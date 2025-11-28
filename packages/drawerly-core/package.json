@@ -1,0 +1,35 @@
+{
+  "name": "@drawerly/core",
+  "version": "0.0.1",
+  "type": "module",
+  "author": "Ahmet Tınastepe",
+  "license": "MIT",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": ["dist"],
+  "sideEffects": false,
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite build --watch",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "drawer",
+    "drawer-manager",
+    "framework-agnostic"
+  ],
+  "devDependencies": {
+    "vite": "catalog:",
+    "vite-plugin-dts": "catalog:",
+    "typescript": "catalog:"
+  }
+}
