@@ -1,0 +1,18 @@
+import { inject } from 'vue'
+import type { DrawerManager } from '@drawerly/core'
+import { DrawerSymbol, type VueDrawerOptions } from './plugin'
+
+/**
+ * Returns the global drawer manager instance.
+ */
+export function useDrawerContext(): DrawerManager<VueDrawerOptions> {
+  const manager = inject(DrawerSymbol)
+
+  if (!manager) {
+    throw new Error(
+      '[@drawerly/vue] useDrawerContext must be used after installing DrawerPlugin',
+    )
+  }
+
+  return manager
+}
