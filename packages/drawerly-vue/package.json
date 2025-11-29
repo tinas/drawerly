@@ -1,30 +1,9 @@
 {
   "name": "@drawerly/vue",
+  "type": "module",
   "version": "0.0.1",
   "author": "Ahmet Tınastepe",
   "license": "MIT",
-  "type": "module",
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.mjs",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.cjs"
-    },
-    "./style.css": "./dist/style.css"
-  },
-  "files": ["dist"],
-  "sideEffects": [
-    "./dist/style.css"
-  ],
-  "scripts": {
-    "build": "vite build",
-    "dev": "vite build --watch",
-    "typecheck": "vue-tsc --noEmit",
-    "clean": "rm -rf dist"
-  },
   "keywords": [
     "drawer",
     "drawer-manager",
@@ -34,6 +13,27 @@
     "ui-component",
     "headless-ui"
   ],
+  "sideEffects": [
+    "./dist/style.css"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    },
+    "./style.css": "./dist/style.css"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "files": ["dist"],
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite build --watch",
+    "typecheck": "vue-tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
   "peerDependencies": {
     "vue": "^3.3.0"
   },
@@ -42,10 +42,10 @@
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "catalog:",
+    "typescript": "catalog:",
     "vite": "catalog:",
     "vite-plugin-dts": "catalog:",
     "vue": "catalog:",
-    "vue-tsc": "catalog:",
-    "typescript": "catalog:"
+    "vue-tsc": "catalog:"
   }
 }

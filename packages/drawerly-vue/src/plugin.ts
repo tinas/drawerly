@@ -1,10 +1,10 @@
-import type { App, Plugin, Component, InjectionKey } from 'vue'
-import { defineComponent, h } from 'vue'
+import type { DrawerManager, DrawerOptions } from '@drawerly/core'
+import type { App, Component, InjectionKey, Plugin } from 'vue'
 import {
   createDrawerManager,
-  type DrawerOptions,
-  type DrawerManager,
+
 } from '@drawerly/core'
+import { defineComponent, h } from 'vue'
 import { DrawerlyContainer } from './drawer-container'
 
 export type DrawerPlacement = 'left' | 'right' | 'top' | 'bottom'
@@ -40,8 +40,8 @@ export interface VueDrawerOptions extends DrawerOptions {
 /**
  * Injection key for the global drawer manager.
  */
-export const DrawerSymbol: InjectionKey<DrawerManager<VueDrawerOptions>> =
-  Symbol('drawerly')
+export const DrawerSymbol: InjectionKey<DrawerManager<VueDrawerOptions>>
+  = Symbol('drawerly')
 
 /**
  * Configuration for the Vue plugin.

@@ -1,15 +1,17 @@
+import type { DrawerInstance, DrawerKey, DrawerManager } from '@drawerly/core'
+import type { PropType } from 'vue'
+import type { VueDrawerOptions } from './plugin'
 import {
   defineComponent,
   h,
-  Teleport,
   inject,
-  shallowRef,
   onMounted,
   onUnmounted,
-  type PropType,
+
+  shallowRef,
+  Teleport,
 } from 'vue'
-import { DrawerSymbol, type VueDrawerOptions } from './plugin'
-import type { DrawerManager, DrawerInstance, DrawerKey } from '@drawerly/core'
+import { DrawerSymbol } from './plugin'
 
 type ManagerState = ReturnType<DrawerManager<VueDrawerOptions>['getState']>
 
@@ -46,39 +48,35 @@ export const DrawerlyContainer = defineComponent({
 
     let unsubscribe: (() => void) | null = null
 
-    const addKeyToSet = (setRef: { value: Set<DrawerKey> }, key: DrawerKey) => {
+    const addKeyToSet = (setRef: { value: Set<DrawerKey> }, key: DrawerKey): void => {
       const next = new Set(setRef.value)
       next.add(key)
       setRef.value = next
     }
 
-    const removeKeyFromSet = (
-      setRef: { value: Set<DrawerKey> },
-      key: DrawerKey,
-    ) => {
-      if (!setRef.value.has(key)) return
+    const removeKeyFromSet = (setRef: { value: Set<DrawerKey> }, key: DrawerKey): void => {
+      if (!setRef.value.has(key))
+        return
       const next = new Set(setRef.value)
       next.delete(key)
       setRef.value = next
     }
 
-    const syncNextTopWithStack = (
-      stack: DrawerInstance<VueDrawerOptions>[],
-    ) => {
-      if (!nextTopKey.value) return
-      const exists = stack.some((d) => d.drawerKey === nextTopKey.value)
-      if (!exists) nextTopKey.value = null
+    const syncNextTopWithStack = (stack: DrawerInstance<VueDrawerOptions>[]): void => {
+      if (!nextTopKey.value)
+        return
+      const exists = stack.some(d => d.drawerKey === nextTopKey.value)
+      if (!exists)
+        nextTopKey.value = null
     }
 
-    const updateEnteringKeys = (
-      prevState: ManagerState,
-      nextState: ManagerState,
-    ) => {
-      const prevKeys = new Set(prevState.stack.map((d) => d.drawerKey))
+    const updateEnteringKeys = (prevState: ManagerState, nextState: ManagerState): void => {
+      const prevKeys = new Set(prevState.stack.map(d => d.drawerKey))
       const newKeys: DrawerKey[] = []
 
       nextState.stack.forEach((d) => {
-        if (!prevKeys.has(d.drawerKey)) newKeys.push(d.drawerKey)
+        if (!prevKeys.has(d.drawerKey))
+          newKeys.push(d.drawerKey)
       })
 
       if (newKeys.length > 0) {
@@ -91,13 +89,14 @@ export const DrawerlyContainer = defineComponent({
       syncNextTopWithStack(nextState.stack)
     }
 
-    const handleCloseAllTransition = (prevState: ManagerState) => {
+    const handleCloseAllTransition = (prevState: ManagerState): void => {
       const prevStack = prevState.stack
-      if (prevStack.length === 0) return
+      if (prevStack.length === 0)
+        return
 
       bulkClosingAll.value = true
 
-      const allKeys = prevStack.map((d) => d.drawerKey)
+      const allKeys = prevStack.map(d => d.drawerKey)
 
       closingKeys.value = new Set([
         ...Array.from(closingKeys.value),
@@ -106,7 +105,7 @@ export const DrawerlyContainer = defineComponent({
 
       if (enteringKeys.value.size > 0) {
         const entering = new Set(enteringKeys.value)
-        allKeys.forEach((key) => entering.delete(key))
+        allKeys.forEach(key => entering.delete(key))
         enteringKeys.value = entering
       }
 
@@ -114,7 +113,7 @@ export const DrawerlyContainer = defineComponent({
       nextTopKey.value = null
     }
 
-    const finalizeClose = (key: DrawerKey) => {
+    const finalizeClose = (key: DrawerKey): void => {
       const isBulk = bulkClosingAll.value
 
       if (!isBulk) {
@@ -136,7 +135,7 @@ export const DrawerlyContainer = defineComponent({
       }
     }
 
-    const closeWithAnimation = (key: DrawerKey) => {
+    const closeWithAnimation = (key: DrawerKey): void => {
       const stack = renderStack.value
       const len = stack.length
 
@@ -160,22 +159,24 @@ export const DrawerlyContainer = defineComponent({
       addKeyToSet(closingKeys, key)
     }
 
-    const handleBackdropClick = (drawer: DrawerInstance<VueDrawerOptions>) => {
+    const handleBackdropClick = (drawer: DrawerInstance<VueDrawerOptions>): void => {
       if (drawer.options?.closeOnBackdrop !== false) {
         closeWithAnimation(drawer.drawerKey)
       }
     }
 
-    const handleClose = (key: DrawerKey) => {
+    const handleClose = (key: DrawerKey): void => {
       closeWithAnimation(key)
     }
 
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== 'Escape') return
+    const handleKeyDown = (event: KeyboardEvent): void => {
+      if (event.key !== 'Escape')
+        return
 
       const stack = renderStack.value
       const len = stack.length
-      if (!len) return
+      if (!len)
+        return
 
       const top = stack[len - 1]
       if (top && top.options?.closeOnEsc !== false) {
@@ -183,12 +184,15 @@ export const DrawerlyContainer = defineComponent({
       }
     }
 
-    const handlePanelAnimationEnd = (key: DrawerKey, event: AnimationEvent) => {
-      if (!closingKeys.value.has(key)) return
+    const handlePanelAnimationEnd = (key: DrawerKey, event: AnimationEvent): void => {
+      if (!closingKeys.value.has(key))
+        return
 
       const name = event.animationName || ''
-      if (!name.startsWith('drawerly-slide-out-')) return
-      if (event.target !== event.currentTarget) return
+      if (!name.startsWith('drawerly-slide-out-'))
+        return
+      if (event.target !== event.currentTarget)
+        return
 
       finalizeClose(key)
     }
@@ -224,7 +228,8 @@ export const DrawerlyContainer = defineComponent({
     return () => {
       const stack = renderStack.value
       const len = stack.length
-      if (!len) return null
+      if (!len)
+        return null
 
       const top = stack[len - 1]
       const topKey: DrawerKey | null = top ? top.drawerKey : null
@@ -246,8 +251,8 @@ export const DrawerlyContainer = defineComponent({
 
             const isTopLike = key === topKey || key === nextTopKey.value
 
-            const userDataAttributes =
-              drawer.options?.dataAttributes != null
+            const userDataAttributes
+              = drawer.options?.dataAttributes != null
                 ? Object.fromEntries(
                     Object.entries(drawer.options.dataAttributes).filter(
                       ([name]) => !name.startsWith('data-drawerly'),
@@ -272,18 +277,18 @@ export const DrawerlyContainer = defineComponent({
               [
                 h('div', {
                   'data-drawerly-backdrop': '',
-                  onClick: () => handleBackdropClick(drawer),
+                  'onClick': () => handleBackdropClick(drawer),
                 }),
                 h(
                   'div',
                   {
                     'data-drawerly-panel': '',
-                    role: 'dialog',
+                    'role': 'dialog',
                     'aria-modal': 'true',
                     'aria-label': drawer.options?.ariaLabel,
                     'aria-describedby': drawer.options?.ariaDescribedBy,
                     'aria-labelledby': drawer.options?.ariaLabelledBy,
-                    onAnimationend: (event: AnimationEvent) =>
+                    'onAnimationend': (event: AnimationEvent) =>
                       handlePanelAnimationEnd(key, event),
                   },
                   drawer.options?.component

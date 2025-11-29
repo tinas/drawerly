@@ -1,6 +1,7 @@
-import { inject } from 'vue'
 import type { DrawerManager } from '@drawerly/core'
-import { DrawerSymbol, type VueDrawerOptions } from './plugin'
+import type { VueDrawerOptions } from './plugin'
+import { inject } from 'vue'
+import { DrawerSymbol } from './plugin'
 
 /**
  * Returns the global drawer manager instance.

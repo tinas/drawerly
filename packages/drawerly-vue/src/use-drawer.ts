@@ -1,7 +1,7 @@
-import { onMounted, onUnmounted, readonly, ref } from 'vue'
 import type { DrawerKey } from '@drawerly/core'
-import { useDrawerContext } from './use-drawer-context'
 import type { VueDrawerOptions } from './plugin'
+import { onMounted, onUnmounted, readonly, ref } from 'vue'
+import { useDrawerContext } from './use-drawer-context'
 
 /**
  * Options accepted by {@link useDrawer}.
@@ -12,9 +12,9 @@ import type { VueDrawerOptions } from './plugin'
 export type UseDrawerOptions<O extends VueDrawerOptions = VueDrawerOptions> = O
 
 export interface UseDrawerResult {
-  open(overrides?: Partial<VueDrawerOptions>): DrawerKey
-  close(): void
-  bringToTop(): void
+  open: (overrides?: Partial<VueDrawerOptions>) => DrawerKey
+  close: () => void
+  bringToTop: () => void
   isOpen: Readonly<{ value: boolean }>
 }
 
@@ -61,9 +61,9 @@ export function useDrawer<O extends VueDrawerOptions = VueDrawerOptions>(
 
   const baseKey: DrawerKey = options.drawerKey
 
-  const computeIsOpen = () => {
+  const computeIsOpen = (): void => {
     const state = manager.getState()
-    isOpenRef.value = state.stack.some((inst) => inst.drawerKey === baseKey)
+    isOpenRef.value = state.stack.some(inst => inst.drawerKey === baseKey)
   }
 
   let unsubscribe: (() => void) | null = null

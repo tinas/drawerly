@@ -1,26 +1,23 @@
 {
   "name": "root",
+  "type": "module",
   "version": "0.0.1",
   "private": true,
-  "type": "module",
   "author": "Ahmet Tınastepe",
   "scripts": {
     "build": "pnpm -r --filter './packages/*' run build",
     "dev": "pnpm -r --filter './packages/*' --parallel run dev",
-    "lint": "eslint packages --ext .ts,.tsx",
-    "lint:fix": "eslint packages --ext .ts,.tsx --fix",
-    "format": "prettier --write \"packages/**/*.{ts,tsx,json,css}\"",
+    "lint": "eslint",
+    "lint:fix": "eslint --fix",
     "typecheck": "pnpm -r --filter './packages/*' run typecheck",
-    "clean": "pnpm -r --filter './packages/*' run clean && rm -rf node_modules"
+    "clean": "pnpm -r --filter './packages/*' run clean && rm -rf node_modules",
+    "docs:dev": "pnpm --filter docs dev",
+    "docs:build": "pnpm --filter docs build",
+    "docs:preview": "pnpm --filter docs preview"
   },
   "devDependencies": {
-    "@eslint/js": "catalog:",
-    "@typescript-eslint/eslint-plugin": "catalog:",
-    "@typescript-eslint/parser": "catalog:",
+    "@antfu/eslint-config": "catalog:",
     "eslint": "catalog:",
-    "eslint-config-prettier": "catalog:",
-    "eslint-plugin-prettier": "catalog:",
-    "prettier": "catalog:",
     "typescript": "catalog:",
     "vite": "catalog:",
     "vite-plugin-dts": "catalog:"

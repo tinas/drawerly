@@ -7,7 +7,7 @@ export default defineConfig({
     lib: {
       entry: path.resolve(__dirname, 'src/index.ts'),
       name: 'DrawerlyCore',
-      fileName: (format) => (format === 'es' ? 'index.mjs' : 'index.cjs'),
+      fileName: format => (format === 'es' ? 'index.mjs' : 'index.cjs'),
       formats: ['es', 'cjs'],
     },
     rollupOptions: {
