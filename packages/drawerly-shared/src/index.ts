@@ -31,7 +31,7 @@ export interface DrawerUiOptions extends DrawerOptions {
    *
    * @defaultValue `true`
    */
-  closeOnEsc?: boolean
+  closeOnEscape?: boolean
 
   /**
    * Whether clicking on the backdrop should close the drawer.

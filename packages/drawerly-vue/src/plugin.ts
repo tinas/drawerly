@@ -5,6 +5,7 @@ import type {
   DrawerPlacement as SharedDrawerPlacement,
 } from '@drawerly/shared'
 import type { App, Component, InjectionKey, Plugin } from 'vue'
+import type { OmitKeys } from './utils'
 import { createDrawerManager } from '@drawerly/core'
 import { defineComponent, h } from 'vue'
 import { DrawerlyContainer } from './drawer-container'
@@ -80,7 +81,7 @@ export interface DrawerPluginOptions {
    * applications to define global behavior such as placement or
    * accessibility attributes.
    */
-  defaultOptions?: Partial<Omit<VueDrawerOptions, 'drawerKey'>>
+  defaultOptions?: Partial<OmitKeys<VueDrawerOptions, 'drawerKey' | 'component'>>
 
   /**
    * Teleport target selector for the container.

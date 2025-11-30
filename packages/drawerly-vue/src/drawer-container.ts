@@ -197,7 +197,7 @@ export const DrawerlyContainer = defineComponent({
         return
 
       const top = stack[len - 1]
-      if (top && top.options?.closeOnEsc !== false) {
+      if (top && top.options?.closeOnEscape !== false) {
         closeWithAnimation(top.drawerKey)
       }
     }
