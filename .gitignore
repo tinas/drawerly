@@ -1,39 +1,8 @@
-# Dependencies
-node_modules/
-.pnpm-store/
-
-# Build outputs
-dist/
-*.tsbuildinfo
-
-# Environment files
-.env
-.env.local
-.env.*.local
-
-# IDE
-.vscode/*
-!.vscode/settings.json
-!.vscode/extensions.json
-.idea/
-*.swp
-*.swo
-*~
-
-# OS
+.cache
+cache
+.idea
 .DS_Store
-Thumbs.db
-
-# Logs
-logs/
-*.log
-npm-debug.log*
-pnpm-debug.log*
-
-# Testing
-coverage/
-.nyc_output/
-
-# Temporary files
-*.tmp
-.cache/
+node_modules
+dist
+logs
+.eslintcache
