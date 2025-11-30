@@ -147,6 +147,10 @@
     var(--drawerly-transition-timing);
 }
 
+[data-drawerly-overlay]:not([data-top]) [data-drawerly-panel] {
+  border-radius: 0 !important;
+}
+
 /* Enter Animations */
 @keyframes drawerly-fade-in {
   from {
