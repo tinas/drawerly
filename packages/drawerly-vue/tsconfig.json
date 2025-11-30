@@ -1,10 +1,5 @@
 {
   "extends": "../../tsconfig.json",
-  "compilerOptions": {
-    "jsx": "preserve",
-    "jsxImportSource": "vue",
-    "noEmit": true
-  },
   "include": ["src", "vite.config.ts"],
   "exclude": ["dist", "node_modules"]
 }

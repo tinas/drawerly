@@ -1,63 +1,136 @@
-import type { DrawerManager, DrawerOptions } from '@drawerly/core'
+import type { DrawerManager } from '@drawerly/core'
+import type {
+  DrawerComponentConfig,
+  DrawerUiOptions,
+  DrawerPlacement as SharedDrawerPlacement,
+} from '@drawerly/shared'
 import type { App, Component, InjectionKey, Plugin } from 'vue'
-import {
-  createDrawerManager,
-
-} from '@drawerly/core'
+import { createDrawerManager } from '@drawerly/core'
 import { defineComponent, h } from 'vue'
 import { DrawerlyContainer } from './drawer-container'
 
-export type DrawerPlacement = 'left' | 'right' | 'top' | 'bottom'
+/**
+ * Re-export of the shared drawer placement union so that consumers can
+ * import it directly from `@drawerly/vue` if they prefer.
+ *
+ * @public
+ */
+export type DrawerPlacement = SharedDrawerPlacement
 
 /**
  * Drawer options used by the Vue adapter.
  *
- * Applications will typically extend this with their own props type.
+ * This interface combines:
+ * - {@link DrawerUiOptions} for shared UI-related configuration
+ * - {@link DrawerComponentConfig} for component-driven drawers
+ *
+ * Applications will typically extend this with a more specific
+ * `componentProps` shape that matches their drawer component.
+ *
+ * @example
+ * ```ts
+ * interface SettingsDrawerOptions extends VueDrawerOptions {
+ *   componentProps: {
+ *     userId: string
+ *     tab?: 'profile' | 'billing'
+ *   }
+ * }
+ * ```
+ *
+ * @public
  */
-export interface VueDrawerOptions extends DrawerOptions {
+export interface VueDrawerOptions
+  extends DrawerUiOptions,
+  DrawerComponentConfig {
   /**
-   * Component rendered inside the drawer panel.
+   * Vue component that will be rendered inside the drawer panel.
+   *
+   * This is optional to allow headless usage, where applications
+   * render their own markup via the default slot of
+   * {@link DrawerlyContainer}.
    */
-  component: Component
-
-  /**
-   * Props passed to the rendered component.
-   */
-  props?: Record<string, unknown>
-
-  placement?: DrawerPlacement
-  closeOnEsc?: boolean
-  closeOnBackdrop?: boolean
-  ariaLabel?: string
-  ariaDescribedBy?: string
-  ariaLabelledBy?: string
-  dataAttributes?: Record<
-    `data-${string}`,
-    string | number | boolean | null | undefined
-  >
+  component?: Component
 }
 
 /**
  * Injection key for the global drawer manager.
+ *
+ * @remarks
+ * This is an internal symbol and should not be used directly.
+ * Applications should use {@link useDrawerContext} instead.
+ *
+ * @internal
  */
 export const DrawerSymbol: InjectionKey<DrawerManager<VueDrawerOptions>>
   = Symbol('drawerly')
 
 /**
- * Configuration for the Vue plugin.
+ * Configuration options for the Vue plugin.
+ *
+ * @public
  */
 export interface DrawerPluginOptions {
   /**
    * Default options merged into all future drawer instances.
-   * `drawerKey` is not required here.
+   * The `drawerKey` is not required here, as it is specific to each
+   * individual drawer.
+   *
+   * These defaults are shallow-merged with the options that are used
+   * when opening a drawer (for example via {@link useDrawer}), allowing
+   * applications to define global behavior such as placement or
+   * accessibility attributes.
    */
   defaultOptions?: Partial<Omit<VueDrawerOptions, 'drawerKey'>>
+
+  /**
+   * Teleport target selector for the container.
+   *
+   * This determines where in the DOM the drawer overlays will be
+   * mounted.
+   *
+   * @defaultValue `'body'`
+   */
   teleportTo?: string
+
+  /**
+   * Enables headless mode on the container.
+   *
+   * In headless mode, the container:
+   * - does not render a backdrop
+   * - does not handle Escape key or backdrop closing behavior
+   * - does not emit animation-related data attributes
+   *
+   * The drawer stack and lifecycle are still managed, but all visual
+   * aspects are left entirely to the application.
+   *
+   * @defaultValue `false`
+   */
   headless?: boolean
 }
 
 /**
- * Vue plugin that registers the global drawer manager and container.
+ * Vue plugin that registers the global {@link DrawerManager} and
+ * the {@link DrawerlyContainer} component.
+ *
+ * @remarks
+ * Once installed, the manager can be accessed via:
+ *
+ * - the {@link useDrawerContext} composable inside setup functions, or
+ * - `this.$drawerly` on Vue component instances.
+ *
+ * @example
+ * ```ts
+ * const app = createApp(App)
+ *
+ * app.use(DrawerPlugin, {
+ *   defaultOptions: {
+ *     placement: 'right',
+ *     closeOnBackdrop: true,
+ *   },
+ * })
+ * ```
+ *
+ * @public
  */
 export const DrawerPlugin: Plugin = {
   install(app: App, options?: DrawerPluginOptions) {
@@ -91,10 +164,16 @@ export const DrawerPlugin: Plugin = {
 
 declare module 'vue' {
   interface ComponentCustomProperties {
+    /**
+     * Global drawer manager instance registered by {@link DrawerPlugin}.
+     */
     $drawerly: DrawerManager<VueDrawerOptions>
   }
 
   export interface GlobalComponents {
+    /**
+     * Root container used to render the active drawer stack.
+     */
     DrawerlyContainer: typeof DrawerlyContainer
   }
 }

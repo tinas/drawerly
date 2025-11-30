@@ -1,108 +1,153 @@
-import type { DrawerKey } from '@drawerly/core'
+import type { DrawerKey, DrawerState } from '@drawerly/core'
+import type { MaybeRefOrGetter, Ref } from 'vue'
 import type { VueDrawerOptions } from './plugin'
-import { onMounted, onUnmounted, readonly, ref } from 'vue'
+import {
+  onMounted,
+  onUnmounted,
+  readonly,
+  ref,
+  toValue,
+} from 'vue'
 import { useDrawerContext } from './use-drawer-context'
 
 /**
  * Options accepted by {@link useDrawer}.
  *
- * This is just {@link VueDrawerOptions} (or your extension of it).
- * `drawerKey` is the identity; no extra properties are added.
+ * The `drawerKey` is passed as the first argument to {@link useDrawer},
+ * so these options intentionally omit it. The key is injected by the
+ * composable when calling the underlying {@link DrawerManager.open}
+ * method.
+ *
+ * Uses Vue’s {@link MaybeRefOrGetter} so options can be:
+ * - plain object
+ * - ref
+ * - computed
+ * - getter function
+ *
+ * @public
  */
 export type UseDrawerOptions<
   TDrawerOptions extends VueDrawerOptions = VueDrawerOptions,
-> = TDrawerOptions
+> = MaybeRefOrGetter<Omit<TDrawerOptions, 'drawerKey'>>
 
-export interface UseDrawerResult<
-  TDrawerOptions extends VueDrawerOptions = VueDrawerOptions,
-> {
-  open: (overrides?: Partial<TDrawerOptions>) => DrawerKey
+/**
+ * Returned result from {@link useDrawer}.
+ *
+ * @public
+ */
+export interface UseDrawerResult {
+  /**
+   * Opens the drawer associated with this hook.
+   *
+   * If the drawer does not exist, it is created.
+   * If it already exists, its options are updated using the latest
+   * resolved {@link UseDrawerOptions} and it is moved to the top
+   * of the stack.
+   */
+  open: () => DrawerKey
+
+  /**
+   * Closes this drawer, if it exists in the stack.
+   */
   close: () => void
+
+  /**
+   * Brings this drawer to the top of the stack, if it exists.
+   */
   bringToTop: () => void
-  isOpen: Readonly<{ value: boolean }>
+
+  /**
+   * Reactive flag indicating whether this drawer is currently open.
+   */
+  isOpen: Readonly<Ref<boolean>>
 }
 
 /**
- * Creates a handle bound to a single drawer identified by `drawerKey`.
+ * Creates a drawer handle bound to a fixed `drawerKey`.
  *
- * Example:
+ * The first argument identifies the drawer, while the second argument
+ * provides its configuration. The configuration can be static or
+ * reactive (ref, computed, or getter). Whenever `open()` is called,
+ * the latest resolved configuration is applied.
+ *
+ * @example Basic usage
  * ```ts
- * const { open } = useDrawer({
- *   drawerKey: 'settings-drawer',
+ * const { open, isOpen } = useDrawer('settings', {
  *   component: SettingsDrawer,
  *   placement: 'right',
- *   dataAttributes: {
- *     'data-drawer-key': 'settings-drawer',
- *   },
- *   props: { userId: '123' },
  * })
  *
  * open()
  * ```
  *
- * You can also extend VueDrawerOptions:
+ * @example Reactive options
  * ```ts
- * interface SettingsOptions extends VueDrawerOptions {
- *   props: {
- *     userId: string
- *     tab?: 'profile' | 'billing'
- *   }
- * }
- *
- * const { open } = useDrawer<SettingsOptions>({
- *   drawerKey: 'settings-drawer',
+ * const options = computed(() => ({
  *   component: SettingsDrawer,
+ *   componentProps: { userId: userId.value },
  *   placement: 'right',
- *   props: { userId: '123' },
- * })
+ * }))
+ *
+ * const { open } = useDrawer('settings', options)
+ *
+ * // The drawer will always receive the most recent configuration
+ * // whenever open() is invoked.
+ * open()
  * ```
+ *
+ * @public
  */
+
 export function useDrawer<
   TDrawerOptions extends VueDrawerOptions = VueDrawerOptions,
->(options: UseDrawerOptions<TDrawerOptions>): UseDrawerResult<TDrawerOptions> {
+>(
+  drawerKey: DrawerKey,
+  options: UseDrawerOptions<TDrawerOptions>,
+): UseDrawerResult {
   const manager = useDrawerContext()
   const isOpenRef = ref(false)
 
-  const baseKey: DrawerKey = options.drawerKey
-
-  const computeIsOpen = (): void => {
-    const state = manager.getState()
-    isOpenRef.value = state.stack.some(inst => inst.drawerKey === baseKey)
+  const handleStateChange = (state: DrawerState<VueDrawerOptions>): void => {
+    isOpenRef.value = state.stack.some(
+      instance => instance.drawerKey === drawerKey,
+    )
   }
 
   let unsubscribe: (() => void) | null = null
 
   onMounted(() => {
-    computeIsOpen()
-    unsubscribe = manager.subscribe(() => {
-      computeIsOpen()
-    })
+    // Initialize from current state
+    handleStateChange(manager.getState())
+
+    // Subscribe to further updates
+    unsubscribe = manager.subscribe(handleStateChange)
   })
 
   onUnmounted(() => {
     unsubscribe?.()
+    unsubscribe = null
   })
 
-  const open = (overrides?: Partial<TDrawerOptions>): DrawerKey => {
-    const merged = {
-      ...(options as VueDrawerOptions),
-      ...(overrides ?? {}),
-      // ensure identity stays consistent unless user explicitly changes it
-      drawerKey: (overrides as Partial<VueDrawerOptions> | undefined)?.drawerKey
-        ?? baseKey,
-    } satisfies VueDrawerOptions
+  const open = (): DrawerKey => {
+    const current = toValue(options)
+
+    const merged: TDrawerOptions = {
+      ...(current as TDrawerOptions),
+      // identity is always driven by the hook argument
+      drawerKey,
+    }
 
     manager.open(merged)
 
-    return merged.drawerKey
+    return drawerKey
   }
 
   const close = (): void => {
-    manager.close(baseKey)
+    manager.close(drawerKey)
   }
 
   const bringToTop = (): void => {
-    manager.bringToTop(baseKey)
+    manager.bringToTop(drawerKey)
   }
 
   return {

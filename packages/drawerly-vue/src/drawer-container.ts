@@ -7,7 +7,6 @@ import {
   inject,
   onMounted,
   onUnmounted,
-
   shallowRef,
   Teleport,
 } from 'vue'
@@ -36,7 +35,11 @@ export const DrawerlyContainer = defineComponent({
       )
     }
 
+    // Last state received from the manager.
     const stateRef = shallowRef<ManagerState>(manager.getState())
+
+    // Stack currently rendered by this container. This can temporarily differ
+    // from `stateRef.value.stack` during "close all" transitions.
     const renderStack = shallowRef<DrawerInstance<VueDrawerOptions>[]>(
       stateRef.value.stack,
     )
@@ -109,6 +112,8 @@ export const DrawerlyContainer = defineComponent({
         enteringKeys.value = entering
       }
 
+      // Keep rendering the previous (non-empty) stack while the manager
+      // has already transitioned to an empty stack.
       renderStack.value = prevStack
       nextTopKey.value = null
     }
@@ -124,6 +129,8 @@ export const DrawerlyContainer = defineComponent({
       removeKeyFromSet(enteringKeys, key)
 
       if (isBulk && closingKeys.value.size === 0) {
+        // All drawers have finished their close animation.
+        // Reflect the manager's current (empty) stack.
         renderStack.value = stateRef.value.stack
         bulkClosingAll.value = false
       }
@@ -136,6 +143,13 @@ export const DrawerlyContainer = defineComponent({
     }
 
     const closeWithAnimation = (key: DrawerKey): void => {
+      // In headless mode we do not rely on CSS-driven animations.
+      // Closing is applied directly via the manager.
+      if (props.headless) {
+        manager.close(key)
+        return
+      }
+
       const stack = renderStack.value
       const len = stack.length
 
@@ -160,6 +174,8 @@ export const DrawerlyContainer = defineComponent({
     }
 
     const handleBackdropClick = (drawer: DrawerInstance<VueDrawerOptions>): void => {
+      if (props.headless)
+        return
       if (drawer.options?.closeOnBackdrop !== false) {
         closeWithAnimation(drawer.drawerKey)
       }
@@ -170,6 +186,8 @@ export const DrawerlyContainer = defineComponent({
     }
 
     const handleKeyDown = (event: KeyboardEvent): void => {
+      if (props.headless)
+        return
       if (event.key !== 'Escape')
         return
 
@@ -185,6 +203,8 @@ export const DrawerlyContainer = defineComponent({
     }
 
     const handlePanelAnimationEnd = (key: DrawerKey, event: AnimationEvent): void => {
+      if (props.headless)
+        return
       if (!closingKeys.value.has(key))
         return
 
@@ -200,10 +220,20 @@ export const DrawerlyContainer = defineComponent({
     onMounted(() => {
       unsubscribe = manager.subscribe((nextState) => {
         const prevState = stateRef.value
+        stateRef.value = nextState
+
+        // Headless mode: no animation bookkeeping, just mirror the manager state.
+        if (props.headless) {
+          renderStack.value = nextState.stack
+          closingKeys.value = new Set()
+          enteringKeys.value = new Set()
+          nextTopKey.value = null
+          bulkClosingAll.value = false
+          return
+        }
+
         const prevLen = prevState.stack.length
         const nextLen = nextState.stack.length
-
-        stateRef.value = nextState
 
         const wasNotEmpty = prevLen > 0
         const isNowEmpty = nextLen === 0
@@ -217,12 +247,17 @@ export const DrawerlyContainer = defineComponent({
         renderStack.value = nextState.stack
       })
 
-      document.addEventListener('keydown', handleKeyDown)
+      if (!props.headless) {
+        document.addEventListener('keydown', handleKeyDown)
+      }
     })
 
     onUnmounted(() => {
       unsubscribe?.()
-      document.removeEventListener('keydown', handleKeyDown)
+
+      if (!props.headless) {
+        document.removeEventListener('keydown', handleKeyDown)
+      }
     })
 
     return () => {
@@ -246,19 +281,18 @@ export const DrawerlyContainer = defineComponent({
           stack.map((drawer, index) => {
             const placement = drawer.options?.placement ?? 'right'
             const key = drawer.drawerKey
-            const isClosing = closingKeys.value.has(key)
-            const isEntering = enteringKeys.value.has(key) && !isClosing
 
+            const isClosing = !props.headless && closingKeys.value.has(key)
+            const isEntering = !props.headless && enteringKeys.value.has(key) && !isClosing
             const isTopLike = key === topKey || key === nextTopKey.value
 
-            const userDataAttributes
-              = drawer.options?.dataAttributes != null
-                ? Object.fromEntries(
-                    Object.entries(drawer.options.dataAttributes).filter(
-                      ([name]) => !name.startsWith('data-drawerly'),
-                    ),
-                  )
-                : undefined
+            const userDataAttributes = drawer.options?.dataAttributes != null
+              ? Object.fromEntries(
+                  Object.entries(drawer.options.dataAttributes).filter(
+                    ([name]) => !name.startsWith('data-drawerly'),
+                  ),
+                )
+              : undefined
 
             return h(
               'div',
@@ -270,15 +304,17 @@ export const DrawerlyContainer = defineComponent({
                 'data-drawerly-count': len,
                 'data-drawerly-placement': placement,
                 ...(isTopLike && { 'data-top': '' }),
-                ...(isClosing && { 'data-closing': '' }),
-                ...(isEntering && { 'data-entering': '' }),
+                ...(!props.headless && isClosing && { 'data-closing': '' }),
+                ...(!props.headless && isEntering && { 'data-entering': '' }),
                 ...(userDataAttributes ?? {}),
               },
               [
-                h('div', {
-                  'data-drawerly-backdrop': '',
-                  'onClick': () => handleBackdropClick(drawer),
-                }),
+                !props.headless
+                  ? h('div', {
+                      'data-drawerly-backdrop': '',
+                      'onClick': () => handleBackdropClick(drawer),
+                    })
+                  : null,
                 h(
                   'div',
                   {
@@ -293,7 +329,7 @@ export const DrawerlyContainer = defineComponent({
                   },
                   drawer.options?.component
                     ? h(drawer.options.component, {
-                        ...drawer.options.props,
+                        ...drawer.options.componentProps,
                         drawerKey: key,
                         onClose: () => handleClose(key),
                       })

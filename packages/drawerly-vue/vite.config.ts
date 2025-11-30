@@ -1,8 +1,11 @@
 import fs from 'node:fs'
+import { createRequire } from 'node:module'
 import path from 'node:path'
 import vue from '@vitejs/plugin-vue'
 import { defineConfig } from 'vite'
 import dts from 'vite-plugin-dts'
+
+const require = createRequire(import.meta.url)
 
 export default defineConfig({
   plugins: [
@@ -14,13 +17,25 @@ export default defineConfig({
       insertTypesEntry: true,
     }),
     {
-      name: 'copy-css',
+      name: 'copy-shared-css',
       closeBundle() {
-        const srcCss = path.resolve(__dirname, 'src/styles.css')
+        let srcCss: string
+
+        try {
+          srcCss = require.resolve('@drawerly/shared/styles.css')
+        }
+        catch {
+          throw new Error(
+            '[@drawerly/vue] Could not resolve "@drawerly/shared/styles.css". Make sure @drawerly/shared is built and exported correctly.',
+          )
+        }
+
         const distCss = path.resolve(__dirname, 'dist/style.css')
 
         if (!fs.existsSync(srcCss)) {
-          throw new Error('[@drawerly/vue] src/styles.css not found.')
+          throw new Error(
+            `[@drawerly/vue] Resolved styles.css from @drawerly/shared does not exist:\n${srcCss}`,
+          )
         }
 
         fs.copyFileSync(srcCss, distCss)
@@ -35,7 +50,7 @@ export default defineConfig({
       formats: ['es', 'cjs'],
     },
     rollupOptions: {
-      external: ['vue', '@drawerly/core'],
+      external: ['vue', '@drawerly/core', '@drawerly/shared'],
       output: {
         exports: 'named',
         globals: {

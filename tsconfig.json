@@ -23,5 +23,5 @@
     "skipLibCheck": true
   },
   "include": ["eslint.config.mjs"],
-  "exclude": ["node_modules", "dist", ".pnpm-store"]
+  "exclude": ["node_modules", "dist"]
 }

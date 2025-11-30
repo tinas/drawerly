@@ -1,5 +1,5 @@
 {
-  "name": "@drawerly/vue",
+  "name": "@drawerly/shared",
   "type": "module",
   "version": "0.0.1",
   "author": "Ahmet Tınastepe",
@@ -7,14 +7,13 @@
   "keywords": [
     "drawer",
     "drawer-manager",
-    "modal",
-    "vue",
-    "vue3",
-    "ui-component",
-    "headless-ui"
+    "ui",
+    "css",
+    "headless-ui",
+    "design-system"
   ],
   "sideEffects": [
-    "./dist/style.css"
+    "./dist/styles.css"
   ],
   "exports": {
     ".": {
@@ -22,31 +21,26 @@
       "import": "./dist/index.mjs",
       "require": "./dist/index.cjs"
     },
-    "./style.css": "./dist/style.css"
+    "./styles.css": "./dist/styles.css"
   },
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "vite build",
     "dev": "vite build --watch",
-    "typecheck": "vue-tsc --noEmit",
+    "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist"
   },
-  "peerDependencies": {
-    "vue": "^3.5.0"
-  },
   "dependencies": {
-    "@drawerly/core": "workspace:*",
-    "@drawerly/shared": "workspace:*"
+    "@drawerly/core": "workspace:*"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "catalog:",
     "typescript": "catalog:",
     "vite": "catalog:",
-    "vite-plugin-dts": "catalog:",
-    "vue": "catalog:",
-    "vue-tsc": "catalog:"
+    "vite-plugin-dts": "catalog:"
   }
 }
