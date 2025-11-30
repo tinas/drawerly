@@ -9,10 +9,14 @@ import { useDrawerContext } from './use-drawer-context'
  * This is just {@link VueDrawerOptions} (or your extension of it).
  * `drawerKey` is the identity; no extra properties are added.
  */
-export type UseDrawerOptions<O extends VueDrawerOptions = VueDrawerOptions> = O
+export type UseDrawerOptions<
+  TDrawerOptions extends VueDrawerOptions = VueDrawerOptions,
+> = TDrawerOptions
 
-export interface UseDrawerResult {
-  open: (overrides?: Partial<VueDrawerOptions>) => DrawerKey
+export interface UseDrawerResult<
+  TDrawerOptions extends VueDrawerOptions = VueDrawerOptions,
+> {
+  open: (overrides?: Partial<TDrawerOptions>) => DrawerKey
   close: () => void
   bringToTop: () => void
   isOpen: Readonly<{ value: boolean }>
@@ -53,9 +57,9 @@ export interface UseDrawerResult {
  * })
  * ```
  */
-export function useDrawer<O extends VueDrawerOptions = VueDrawerOptions>(
-  options: UseDrawerOptions<O>,
-): UseDrawerResult {
+export function useDrawer<
+  TDrawerOptions extends VueDrawerOptions = VueDrawerOptions,
+>(options: UseDrawerOptions<TDrawerOptions>): UseDrawerResult<TDrawerOptions> {
   const manager = useDrawerContext()
   const isOpenRef = ref(false)
 
@@ -79,12 +83,13 @@ export function useDrawer<O extends VueDrawerOptions = VueDrawerOptions>(
     unsubscribe?.()
   })
 
-  const open = (overrides?: Partial<VueDrawerOptions>): DrawerKey => {
+  const open = (overrides?: Partial<TDrawerOptions>): DrawerKey => {
     const merged = {
       ...(options as VueDrawerOptions),
       ...(overrides ?? {}),
       // ensure identity stays consistent unless user explicitly changes it
-      drawerKey: overrides?.drawerKey ?? baseKey,
+      drawerKey: (overrides as Partial<VueDrawerOptions> | undefined)?.drawerKey
+        ?? baseKey,
     } satisfies VueDrawerOptions
 
     manager.open(merged)
