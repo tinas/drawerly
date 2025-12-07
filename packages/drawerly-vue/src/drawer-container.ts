@@ -39,7 +39,23 @@ export const DrawerlyContainer = defineComponent({
     },
   },
 
-  setup(props, { slots }) {
+  emits: {
+    /** when a drawer key appears in the stack */
+    'drawer-opened': (_payload: { key: DrawerKey }) => true,
+
+    /** when a drawer finishes closing */
+    'drawer-closed': (
+      _payload: { key: DrawerKey, mode: 'single' | 'bulk' },
+    ) => true,
+
+    /** when a bulk close starts */
+    'drawer-close-all-start': (_payload: { keys: DrawerKey[] }) => true,
+
+    /** when a bulk close finishes */
+    'drawer-close-all-complete': () => true,
+  },
+
+  setup(props, { slots, emit }) {
     const manager = inject<DrawerManager<VueDrawerOptions>>(DrawerSymbol)
     if (!manager) {
       throw new Error(
@@ -107,6 +123,10 @@ export const DrawerlyContainer = defineComponent({
           ...enteringKeys.value,
           ...newKeys,
         ])
+
+        newKeys.forEach((key) => {
+          emit('drawer-opened', { key })
+        })
       }
 
       syncNextTopWithStack(nextState.stack)
@@ -139,6 +159,8 @@ export const DrawerlyContainer = defineComponent({
 
       renderStack.value = prevStack
       nextTopKey.value = null
+
+      emit('drawer-close-all-start', { keys: allKeys })
     }
 
     const finalizeClose = (key: DrawerKey): void => {
@@ -150,9 +172,15 @@ export const DrawerlyContainer = defineComponent({
       removeKey(closingKeys, key)
       removeKey(enteringKeys, key)
 
+      emit('drawer-closed', {
+        key,
+        mode: isBulk ? 'bulk' : 'single',
+      })
+
       if (isBulk && closingKeys.value.size === 0) {
         renderStack.value = managerState.stack
         bulkClosingAll.value = false
+        emit('drawer-close-all-complete')
       }
 
       syncNextTopWithStack(managerState.stack)
@@ -163,6 +191,7 @@ export const DrawerlyContainer = defineComponent({
     const closeWithAnimation = (key: DrawerKey): void => {
       if (props.headless) {
         manager.close(key)
+        emit('drawer-closed', { key, mode: 'single' })
         return
       }
 
@@ -189,7 +218,9 @@ export const DrawerlyContainer = defineComponent({
       addKey(closingKeys, key)
     }
 
-    const handleBackdropClick = (drawer: DrawerInstance<VueDrawerOptions>): void => {
+    const handleBackdropClick = (
+      drawer: DrawerInstance<VueDrawerOptions>,
+    ): void => {
       if (props.headless)
         return
 

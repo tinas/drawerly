@@ -1,3 +1,5 @@
+/// <reference types="vitest/config" />
+
 import fs from 'node:fs'
 import { createRequire } from 'node:module'
 import path from 'node:path'
@@ -60,5 +62,9 @@ export default defineConfig({
     },
     emptyOutDir: true,
     sourcemap: true,
+  },
+  test: {
+    environment: 'jsdom',
+    globals: true,
   },
 })
