@@ -11,7 +11,6 @@ import type {
 } from '../src/use-drawer-context'
 import type { VueDrawerOptions } from '../src/utils'
 
-import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { inject, markRaw } from 'vue'
 import { useDrawerContext } from '../src/use-drawer-context'
 
@@ -71,7 +70,7 @@ describe('useDrawerContext', () => {
     // getState
     const state = ctx.getState()
     expect(manager.getState).toHaveBeenCalledTimes(1)
-    expect(state).toBe((manager.getState as Mock).mock.results[0].value)
+    expect(state).toBe((manager.getState as Mock).mock.results[0]?.value)
 
     // getDrawerInstance
     ctx.getDrawerInstance('drawer-1')
@@ -81,7 +80,7 @@ describe('useDrawerContext', () => {
     const listener = vi.fn()
     const unsubscribe = ctx.subscribe(listener)
     expect(manager.subscribe).toHaveBeenCalledWith(listener)
-    const unsubscribeFromManager = (manager.subscribe as Mock).mock.results[0].value
+    const unsubscribeFromManager = (manager.subscribe as Mock).mock.results[0]!.value
     expect(unsubscribe).toBe(unsubscribeFromManager)
 
     // close
@@ -155,7 +154,7 @@ describe('useDrawerContext', () => {
 
     // manager.open receives merged options with markRaw(component)
     expect(manager.open).toHaveBeenCalledTimes(1)
-    const openArg = (manager.open as Mock).mock.calls[0][0] as VueDrawerOptions
+    const openArg = (manager.open as Mock).mock.calls[0]![0] as VueDrawerOptions
 
     expect(openArg.drawerKey).toBe('drawer-1')
     expect(openArg.placement).toBe('right')
@@ -177,7 +176,7 @@ describe('useDrawerContext', () => {
     expect(markRawMock).not.toHaveBeenCalled()
     expect(manager.open).toHaveBeenCalledTimes(1)
 
-    const openArg = (manager.open as Mock).mock.calls[0][0] as VueDrawerOptions
+    const openArg = (manager.open as Mock).mock.calls[0]![0] as VueDrawerOptions
     expect(openArg.drawerKey).toBe('drawer-2')
     // component is explicitly set to undefined by the implementation
     expect(openArg.component).toBeUndefined()
@@ -209,7 +208,7 @@ describe('useDrawerContext', () => {
 
     // Grab the wrapper passed to manager.updateDefaultOptions
     expect(manager.updateDefaultOptions).toHaveBeenCalledTimes(1)
-    const wrapper = (manager.updateDefaultOptions as Mock).mock.calls[0][0] as (
+    const wrapper = (manager.updateDefaultOptions as Mock).mock.calls[0]![0] as (
       prev: DrawerDefaultOptions<VueDrawerOptions> | undefined,
     ) => DrawerDefaultOptions<VueDrawerOptions>
 
@@ -255,7 +254,7 @@ describe('useDrawerContext', () => {
     ctx.updateDefaultOptions(userUpdater)
 
     expect(manager.updateDefaultOptions).toHaveBeenCalledTimes(1)
-    const wrapper = (manager.updateDefaultOptions as Mock).mock.calls[0][0] as (
+    const wrapper = (manager.updateDefaultOptions as Mock).mock.calls[0]![0] as (
       prev: DrawerDefaultOptions<VueDrawerOptions> | undefined,
     ) => DrawerDefaultOptions<VueDrawerOptions>
 
@@ -299,7 +298,7 @@ describe('useDrawerContext', () => {
     ctx.updateOptions('drawer-1', userUpdater)
 
     expect(manager.updateOptions).toHaveBeenCalledTimes(1)
-    const wrapper = (manager.updateOptions as Mock).mock.calls[0][1] as (
+    const wrapper = (manager.updateOptions as Mock).mock.calls[0]![1] as (
       prev: DrawerUpdatableOptions<VueDrawerOptions>,
     ) => DrawerUpdatableOptions<VueDrawerOptions>
 

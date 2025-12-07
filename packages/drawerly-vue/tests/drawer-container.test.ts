@@ -2,15 +2,6 @@ import type { DrawerState } from '@drawerly/core'
 import type { VueDrawerOptions } from '../src/utils'
 
 import { mount } from '@vue/test-utils'
-import {
-  afterEach,
-  beforeAll,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from 'vitest'
 import { DrawerlyContainer } from '../src/drawer-container'
 import { DrawerSymbol } from '../src/utils'
 

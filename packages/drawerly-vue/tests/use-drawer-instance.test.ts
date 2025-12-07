@@ -6,7 +6,6 @@ import type { Mock } from 'vitest'
 import type { UseDrawerInstanceResult } from '../src/use-drawer-instance'
 import type { VueDrawerOptions } from '../src/utils'
 
-import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { useDrawerContext } from '../src/use-drawer-context'
 import { useDrawerInstance } from '../src/use-drawer-instance'
 
@@ -161,15 +160,15 @@ describe('useDrawerInstance', () => {
 
     // simulate mount
     expect(mountedCallbacks).toHaveLength(1)
-    mountedCallbacks[0]()
+    mountedCallbacks[0]!()
 
     expect(manager.subscribe).toHaveBeenCalledTimes(1)
-    const listener = (manager.subscribe as Mock).mock.calls[0][0]
+    const listener = (manager.subscribe as Mock).mock.calls[0]![0]
     expect(typeof listener).toBe('function')
 
     // simulate unmount
     expect(beforeUnmountCallbacks).toHaveLength(1)
-    beforeUnmountCallbacks[0]()
+    beforeUnmountCallbacks[0]!()
 
     expect(unsubscribeMock).toHaveBeenCalledTimes(1)
   })
@@ -188,7 +187,7 @@ describe('useDrawerInstance', () => {
     const api = useDrawerInstance('drawer-1') as UseDrawerInstanceResult
 
     // simulate mount
-    mountedCallbacks[0]()
+    mountedCallbacks[0]!()
 
     const state: DrawerState<VueDrawerOptions> = {
       stack: [
@@ -245,7 +244,7 @@ describe('useDrawerInstance', () => {
     api.placement.value = 'bottom'
 
     expect(manager.updateOptions).toHaveBeenCalledTimes(1)
-    const [key, updater] = (manager.updateOptions as Mock).mock.calls[0]
+    const [key, updater] = (manager.updateOptions as Mock).mock.calls[0]!
 
     expect(key).toBe('drawer-1')
     expect(typeof updater).toBe('function')
@@ -301,7 +300,7 @@ describe('useDrawerInstance', () => {
     api.closeOnEscapeKey.value = true
 
     expect(manager.updateOptions).toHaveBeenCalledTimes(1)
-    const [key, updater] = (manager.updateOptions as Mock).mock.calls[0]
+    const [key, updater] = (manager.updateOptions as Mock).mock.calls[0]!
 
     expect(key).toBe('drawer-1')
 
@@ -354,7 +353,7 @@ describe('useDrawerInstance', () => {
     api.closeOnBackdropClick.value = true
 
     expect(manager.updateOptions).toHaveBeenCalledTimes(1)
-    const [key, updater] = (manager.updateOptions as Mock).mock.calls[0]
+    const [key, updater] = (manager.updateOptions as Mock).mock.calls[0]!
 
     expect(key).toBe('drawer-1')
 
@@ -398,7 +397,7 @@ describe('useDrawerInstance', () => {
     api.updateOptions(updater as any)
 
     expect(manager.updateOptions).toHaveBeenCalledTimes(1)
-    const [key, passedUpdater] = (manager.updateOptions as Mock).mock.calls[0]
+    const [key, passedUpdater] = (manager.updateOptions as Mock).mock.calls[0]!
 
     expect(key).toBe('drawer-1')
     expect(passedUpdater).toBe(updater)

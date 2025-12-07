@@ -1,3 +1,5 @@
+/// <reference types="vitest/config" />
+
 import fs from 'node:fs'
 import path from 'node:path'
 import { defineConfig } from 'vite'
@@ -38,5 +40,8 @@ export default defineConfig({
     },
     emptyOutDir: true,
     sourcemap: true,
+  },
+  test: {
+    globals: true,
   },
 })

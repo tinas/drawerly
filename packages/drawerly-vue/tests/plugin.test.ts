@@ -2,7 +2,6 @@ import type { Mock } from 'vitest'
 import type { VueDrawerOptions } from '../src/utils'
 
 import { createDrawerManager } from '@drawerly/core'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { DrawerlyContainer } from '../src/drawer-container'
 import { DrawerPlugin } from '../src/plugin'
 import { DrawerSymbol } from '../src/utils'
@@ -41,7 +40,7 @@ describe('drawerPlugin', () => {
     DrawerPlugin.install!(app)
 
     expect(createDrawerManagerMock).toHaveBeenCalledTimes(1)
-    const [initialStateArg, defaultsArg] = createDrawerManagerMock.mock.calls[0]
+    const [initialStateArg, defaultsArg] = createDrawerManagerMock.mock.calls[0]!
 
     expect(initialStateArg).toBeUndefined()
     expect(defaultsArg).toEqual({
@@ -91,7 +90,7 @@ describe('drawerPlugin', () => {
     DrawerPlugin.install!(app, pluginOptions)
 
     expect(createDrawerManagerMock).toHaveBeenCalledTimes(1)
-    const [, defaultsArg] = createDrawerManagerMock.mock.calls[0]
+    const [_, defaultsArg] = createDrawerManagerMock.mock.calls[0]!
 
     expect(defaultsArg).toEqual({
       placement: 'left',

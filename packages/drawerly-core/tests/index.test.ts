@@ -4,7 +4,6 @@ import type {
   DrawerOptions,
   DrawerState,
 } from '../src/index'
-import { describe, expect, it, vi } from 'vitest'
 import { createDrawerManager } from '../src/index'
 
 interface TestDrawerOptions extends DrawerOptions {
