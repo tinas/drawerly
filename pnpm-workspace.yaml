@@ -1,5 +1,5 @@
 packages:
-  - 'packages/*'
+  - packages/*
   - docs
   - '!playground'
 
@@ -11,6 +11,7 @@ catalog:
   vite: ^7.2.4
   vite-plugin-dts: ^4.5.4
   vitepress: ^1.6.4
+  vitest: ^4.0.15
   vue: 3.5.24
   vue-tsc: ^2.2.0
 
