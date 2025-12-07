@@ -3,7 +3,7 @@ import type {
   DrawerKey,
   DrawerManager,
 } from '@drawerly/core'
-import type { PropType } from 'vue'
+import type { Ref } from 'vue'
 import type { VueDrawerOptions } from './utils'
 import {
   defineComponent,
@@ -18,11 +18,19 @@ import { DrawerSymbol } from './utils'
 
 type ManagerState = ReturnType<DrawerManager<VueDrawerOptions>['getState']>
 
+/**
+ * Internal container that renders and animates the active drawer stack.
+ *
+ * Registered globally by {@link DrawerPlugin}.
+ *
+ * @internal
+ */
 export const DrawerlyContainer = defineComponent({
   name: 'DrawerlyContainer',
+
   props: {
     teleportTo: {
-      type: String as PropType<string>,
+      type: String,
       default: 'body',
     },
     headless: {
@@ -39,25 +47,32 @@ export const DrawerlyContainer = defineComponent({
       )
     }
 
-    const stateRef = shallowRef<ManagerState>(manager.getState())
+    // Latest manager state (not reactive in the template, only used in helpers).
+    let managerState: ManagerState = manager.getState()
+
+    // Stack used for rendering. In animated mode this can temporarily diverge
+    // from `managerState.stack` while drawers are closing.
     const renderStack = shallowRef<DrawerInstance<VueDrawerOptions>[]>(
-      stateRef.value.stack,
+      managerState.stack,
     )
 
-    const closingKeys = shallowRef(new Set<DrawerKey>())
-    const enteringKeys = shallowRef(new Set<DrawerKey>())
+    // Per-key animation state.
+    const closingKeys = shallowRef<Set<DrawerKey>>(new Set())
+    const enteringKeys = shallowRef<Set<DrawerKey>>(new Set())
     const nextTopKey = shallowRef<DrawerKey | null>(null)
     const bulkClosingAll = shallowRef(false)
 
     let unsubscribe: (() => void) | null = null
 
-    const addKey = (setRef: { value: Set<DrawerKey> }, key: DrawerKey): void => {
+    const addKey = (setRef: Ref<Set<DrawerKey>>, key: DrawerKey): void => {
+      if (setRef.value.has(key))
+        return
       const next = new Set(setRef.value)
       next.add(key)
       setRef.value = next
     }
 
-    const removeKey = (setRef: { value: Set<DrawerKey> }, key: DrawerKey): void => {
+    const removeKey = (setRef: Ref<Set<DrawerKey>>, key: DrawerKey): void => {
       if (!setRef.value.has(key))
         return
       const next = new Set(setRef.value)
@@ -75,7 +90,7 @@ export const DrawerlyContainer = defineComponent({
         nextTopKey.value = null
     }
 
-    const computeEnteringKeys = (
+    const updateEnteringKeys = (
       prevState: ManagerState,
       nextState: ManagerState,
     ): void => {
@@ -87,9 +102,9 @@ export const DrawerlyContainer = defineComponent({
           newKeys.push(d.drawerKey)
       })
 
-      if (newKeys.length) {
+      if (newKeys.length > 0) {
         enteringKeys.value = new Set([
-          ...Array.from(enteringKeys.value),
+          ...enteringKeys.value,
           ...newKeys,
         ])
       }
@@ -97,7 +112,12 @@ export const DrawerlyContainer = defineComponent({
       syncNextTopWithStack(nextState.stack)
     }
 
-    const handleCloseAllTransition = (prevState: ManagerState): void => {
+    /**
+     * When `closeAll` is called, we want to animate all drawers out instead of
+     * unmounting them immediately. We keep the previous stack for rendering
+     * and mark all keys as "closing".
+     */
+    const startCloseAllAnimation = (prevState: ManagerState): void => {
       const prevStack = prevState.stack
       if (!prevStack.length)
         return
@@ -107,7 +127,7 @@ export const DrawerlyContainer = defineComponent({
       const allKeys = prevStack.map(d => d.drawerKey)
 
       closingKeys.value = new Set([
-        ...Array.from(closingKeys.value),
+        ...closingKeys.value,
         ...allKeys,
       ])
 
@@ -131,11 +151,11 @@ export const DrawerlyContainer = defineComponent({
       removeKey(enteringKeys, key)
 
       if (isBulk && closingKeys.value.size === 0) {
-        renderStack.value = stateRef.value.stack
+        renderStack.value = managerState.stack
         bulkClosingAll.value = false
       }
 
-      syncNextTopWithStack(stateRef.value.stack)
+      syncNextTopWithStack(managerState.stack)
       if (!isBulk)
         nextTopKey.value = null
     }
@@ -158,6 +178,8 @@ export const DrawerlyContainer = defineComponent({
         }
       }
 
+      // If the current top drawer is closing, remember the one below it
+      // so CSS can treat it as "next top" during the transition.
       if (closingIndex !== -1 && len > 1 && closingIndex === len - 1) {
         const below = stack[len - 2]
         if (below)
@@ -171,11 +193,11 @@ export const DrawerlyContainer = defineComponent({
       if (props.headless)
         return
 
-      const _closeOnBackdropClick = typeof drawer.closeOnBackdropClick === 'function'
+      const closeOnBackdropClick = typeof drawer.closeOnBackdropClick === 'function'
         ? drawer.closeOnBackdropClick(drawer)
         : Boolean(drawer.closeOnBackdropClick)
 
-      if (_closeOnBackdropClick)
+      if (closeOnBackdropClick)
         closeWithAnimation(drawer.drawerKey)
     }
 
@@ -192,11 +214,11 @@ export const DrawerlyContainer = defineComponent({
       const stack = renderStack.value
       const top = stack[stack.length - 1]
 
-      const _closeOnEscapeKey = typeof top?.closeOnEscapeKey === 'function'
+      const closeOnEscapeKey = typeof top?.closeOnEscapeKey === 'function'
         ? top.closeOnEscapeKey(top)
         : Boolean(top?.closeOnEscapeKey)
 
-      if (top && _closeOnEscapeKey)
+      if (top && closeOnEscapeKey)
         closeWithAnimation(top.drawerKey)
     }
 
@@ -220,8 +242,8 @@ export const DrawerlyContainer = defineComponent({
 
     onMounted(() => {
       unsubscribe = manager.subscribe((nextState) => {
-        const prevState = stateRef.value
-        stateRef.value = nextState
+        const prevState = managerState
+        managerState = nextState
 
         if (props.headless) {
           renderStack.value = nextState.stack
@@ -238,12 +260,14 @@ export const DrawerlyContainer = defineComponent({
         const wasNotEmpty = prevLen > 0
         const isNowEmpty = nextLen === 0
 
+        // Detect a `closeAll` call: state goes from non-empty to empty
+        // while no drawers are currently closing.
         if (wasNotEmpty && isNowEmpty && closingKeys.value.size === 0) {
-          handleCloseAllTransition(prevState)
+          startCloseAllAnimation(prevState)
           return
         }
 
-        computeEnteringKeys(prevState, nextState)
+        updateEnteringKeys(prevState, nextState)
         renderStack.value = nextState.stack
       })
 
@@ -281,15 +305,12 @@ export const DrawerlyContainer = defineComponent({
             const key = drawer.drawerKey
             const placement = drawer.placement ?? 'right'
 
-            const isClosing
-              = !props.headless && closingKeys.value.has(key)
-            const isEntering
-              = !props.headless
-                && enteringKeys.value.has(key)
-                && !isClosing
+            const isClosing = !props.headless && closingKeys.value.has(key)
+            const isEntering = !props.headless
+              && enteringKeys.value.has(key)
+              && !isClosing
 
-            const isTopLike
-              = key === topKey || key === nextTopKey.value
+            const isTopLike = key === topKey || key === nextTopKey.value
 
             const userDataAttributes
               = drawer.dataAttributes != null

@@ -1,12 +1,53 @@
 import type {
   DrawerDefaultOptions,
+  DrawerKey,
   DrawerManager,
+  DrawerUpdatableOptions,
 } from '@drawerly/core'
 import type { VueDrawerOptions } from './utils'
 
 import { inject, markRaw } from 'vue'
 import { DrawerSymbol } from './utils'
 
+/**
+ * Vue drawer options without the `component` field.
+ *
+ * @public
+ */
+export type VueDrawerOptionsWithoutComponent<
+  TVueDrawerOptions extends VueDrawerOptions = VueDrawerOptions,
+> = Omit<TVueDrawerOptions, 'component'>
+
+/**
+ * Updatable Vue drawer options, excluding `component`.
+ *
+ * Mirrors {@link DrawerUpdatableOptions} from core but hides `component`.
+ *
+ * @public
+ */
+export type VueDrawerUpdatableOptionsWithoutComponent<
+  TVueDrawerOptions extends VueDrawerOptions = VueDrawerOptions,
+> = Omit<DrawerUpdatableOptions<TVueDrawerOptions>, 'component'>
+
+/**
+ * Default Vue drawer options, excluding `component`.
+ *
+ * Mirrors {@link DrawerDefaultOptions} from core but hides `component`.
+ *
+ * @public
+ */
+export type VueDrawerDefaultOptionsWithoutComponent<
+  TVueDrawerOptions extends VueDrawerOptions = VueDrawerOptions,
+> = Omit<DrawerDefaultOptions<TVueDrawerOptions>, 'component'>
+
+/**
+ * API returned by {@link useDrawerContext}.
+ *
+ * Mirrors {@link DrawerManager} but:
+ * - `defaultOptions` and updates never expose or modify `component`.
+ *
+ * @public
+ */
 export interface UseDrawerContextResult<
   TVueDrawerOptions extends VueDrawerOptions = VueDrawerOptions,
 > {
@@ -14,7 +55,12 @@ export interface UseDrawerContextResult<
 
   getDrawerInstance: DrawerManager<TVueDrawerOptions>['getDrawerInstance']
 
-  getDefaultOptions: DrawerManager<Omit<TVueDrawerOptions, 'component'>>['getDefaultOptions']
+  /**
+   * Returns global default options for Vue drawers, excluding `component`.
+   */
+  getDefaultOptions: () =>
+    | VueDrawerDefaultOptionsWithoutComponent<TVueDrawerOptions>
+    | undefined
 
   subscribe: DrawerManager<TVueDrawerOptions>['subscribe']
 
@@ -26,17 +72,40 @@ export interface UseDrawerContextResult<
 
   closeAll: DrawerManager<TVueDrawerOptions>['closeAll']
 
-  updateDefaultOptions: DrawerManager<Omit<TVueDrawerOptions, 'component'>>['updateDefaultOptions']
+  /**
+   * Updates global default options for Vue drawers, excluding `component`.
+   */
+  updateDefaultOptions: (
+    updater: (
+      prev:
+        | VueDrawerDefaultOptionsWithoutComponent<TVueDrawerOptions>
+        | undefined,
+    ) => VueDrawerDefaultOptionsWithoutComponent<TVueDrawerOptions>,
+  ) => void
 
-  updateOptions: DrawerManager<Omit<TVueDrawerOptions, 'component'>>['updateOptions']
+  /**
+   * Updates options for an existing drawer, excluding `component`.
+   */
+  updateOptions: (
+    drawerKey: DrawerKey,
+    updater: (
+      prev: VueDrawerUpdatableOptionsWithoutComponent<TVueDrawerOptions>,
+    ) => VueDrawerUpdatableOptionsWithoutComponent<TVueDrawerOptions>,
+  ) => void
 }
 
 /**
  * Returns the global drawer manager instance registered by {@link DrawerPlugin}.
  *
+ * The returned API:
+ * - automatically marks the `component` passed to {@link DrawerManager.open} as `markRaw`
+ * - hides `component` from defaults and option updates.
+ *
  * @public
  */
-export function useDrawerContext<TVueDrawerOptions extends VueDrawerOptions>(): UseDrawerContextResult<TVueDrawerOptions> {
+export function useDrawerContext<
+  TVueDrawerOptions extends VueDrawerOptions = VueDrawerOptions,
+>(): UseDrawerContextResult<TVueDrawerOptions> {
   const manager = inject<DrawerManager<TVueDrawerOptions>>(DrawerSymbol)
 
   if (!manager) {
@@ -45,58 +114,92 @@ export function useDrawerContext<TVueDrawerOptions extends VueDrawerOptions>(): 
     )
   }
 
-  const getState: UseDrawerContextResult<TVueDrawerOptions>['getState'] = () => manager.getState()
+  const getState: UseDrawerContextResult<
+    TVueDrawerOptions
+  >['getState'] = () => manager.getState()
 
-  const getDrawerInstance: UseDrawerContextResult<TVueDrawerOptions>['getDrawerInstance'] = (drawerKey) => {
-    return manager.getDrawerInstance(drawerKey)
+  const getDrawerInstance: UseDrawerContextResult<
+    TVueDrawerOptions
+  >['getDrawerInstance'] = drawerKey => manager.getDrawerInstance(drawerKey)
+
+  const getDefaultOptions: UseDrawerContextResult<
+    TVueDrawerOptions
+  >['getDefaultOptions'] = () => {
+    const defaults = manager.getDefaultOptions()
+    if (!defaults)
+      return undefined
+
+    const { component, ...rest } = defaults
+
+    return rest as VueDrawerDefaultOptionsWithoutComponent<TVueDrawerOptions>
   }
 
-  const getDefaultOptions: UseDrawerContextResult<TVueDrawerOptions>['getDefaultOptions'] = () => {
-    const defaultOptions = manager.getDefaultOptions()
+  const subscribe: UseDrawerContextResult<
+    TVueDrawerOptions
+  >['subscribe'] = listener => manager.subscribe(listener)
 
-    // Omit 'component' from the returned default options
-    const { component, ...rest } = defaultOptions || {}
-    return rest as DrawerDefaultOptions<Omit<TVueDrawerOptions, 'component'>> | undefined
-  }
-
-  const subscribe: UseDrawerContextResult<TVueDrawerOptions>['subscribe'] = listener => manager.subscribe(listener)
-
-  const open: UseDrawerContextResult<TVueDrawerOptions>['open'] = (options) => {
-    const { component, ...rest } = options
+  const open: UseDrawerContextResult<
+    TVueDrawerOptions
+  >['open'] = (options) => {
+    const { component, ...rest } = options as VueDrawerOptions
 
     return manager.open({
-      ...rest,
+      ...(rest as TVueDrawerOptions),
       component: component ? markRaw(component) : undefined,
     } as TVueDrawerOptions)
   }
 
-  const close: UseDrawerContextResult<TVueDrawerOptions>['close'] = (drawerKey) => {
-    manager.close(drawerKey)
+  const close: UseDrawerContextResult<
+    TVueDrawerOptions
+  >['close'] = drawerKey => manager.close(drawerKey)
+
+  const bringToTop: UseDrawerContextResult<
+    TVueDrawerOptions
+  >['bringToTop'] = drawerKey => manager.bringToTop(drawerKey)
+
+  const closeAll: UseDrawerContextResult<
+    TVueDrawerOptions
+  >['closeAll'] = () => manager.closeAll()
+
+  const updateDefaultOptions: UseDrawerContextResult<
+    TVueDrawerOptions
+  >['updateDefaultOptions'] = (updater) => {
+    manager.updateDefaultOptions((prev) => {
+      const { component, ...restPrev } = (prev ?? {}) as DrawerDefaultOptions<TVueDrawerOptions>
+
+      const nextWithoutComponent = updater(
+        restPrev as VueDrawerDefaultOptionsWithoutComponent<TVueDrawerOptions>,
+      )
+
+      // Preserve any existing component default, but do not allow changing it
+      // through this API.
+      // TS cannot fully infer this merged shape, so we use a controlled cast.
+      return {
+        ...(prev ?? {}),
+        ...nextWithoutComponent,
+        ...(component ? { component } : {}),
+      } as unknown as DrawerDefaultOptions<TVueDrawerOptions>
+    })
   }
 
-  const bringToTop: UseDrawerContextResult<TVueDrawerOptions>['bringToTop'] = (drawerKey) => {
-    manager.bringToTop(drawerKey)
-  }
+  const updateOptions: UseDrawerContextResult<
+    TVueDrawerOptions
+  >['updateOptions'] = (drawerKey, updater) => {
+    manager.updateOptions(drawerKey, (prev) => {
+      const { component, ...restPrev } = prev as DrawerUpdatableOptions<TVueDrawerOptions>
 
-  const closeAll: UseDrawerContextResult<TVueDrawerOptions>['closeAll'] = () => {
-    manager.closeAll()
-  }
+      const nextWithoutComponent = updater(
+        restPrev as VueDrawerUpdatableOptionsWithoutComponent<TVueDrawerOptions>,
+      )
 
-  const updateDefaultOptions: UseDrawerContextResult<TVueDrawerOptions>['updateDefaultOptions'] = (updater) => {
-    manager.updateDefaultOptions(
-      updater as unknown as (
-        prev: DrawerDefaultOptions<TVueDrawerOptions> | undefined,
-      ) => DrawerDefaultOptions<TVueDrawerOptions>,
-    )
-  }
-
-  const updateOptions: UseDrawerContextResult<TVueDrawerOptions>['updateOptions'] = (drawerKey, updater) => {
-    manager.updateOptions(
-      drawerKey,
-      updater as unknown as (
-        prev: DrawerDefaultOptions<TVueDrawerOptions>,
-      ) => DrawerDefaultOptions<TVueDrawerOptions>,
-    )
+      // Preserve the existing component on the instance
+      // do not allow swapping it via updates.
+      return {
+        ...prev,
+        ...nextWithoutComponent,
+        ...(component ? { component } : {}),
+      } as DrawerUpdatableOptions<TVueDrawerOptions>
+    })
   }
 
   return {

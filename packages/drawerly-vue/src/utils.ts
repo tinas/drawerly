@@ -2,13 +2,12 @@ import type {
   DrawerOptions as CoreDrawerOptions,
   DrawerManager,
 } from '@drawerly/core'
-import type {
-  Component,
-  InjectionKey,
-} from 'vue'
+import type { Component, InjectionKey } from 'vue'
 
 /**
- * Drawer options supported by the Vue adapter.
+ * Drawer options for the Vue adapter.
+ *
+ * Extends the core options with a renderable component and props.
  *
  * @public
  */
@@ -23,11 +22,11 @@ export interface VueDrawerOptions extends CoreDrawerOptions {
   /**
    * Props passed to the rendered component.
    */
-  componentParams?: Record<string, any>
+  componentParams?: Record<string, unknown>
 }
 
 /**
- * Injection key for accessing the global drawer manager.
+ * Injection key for the global drawer manager instance.
  *
  * @internal
  */

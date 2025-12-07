@@ -2,13 +2,8 @@ import type {
   DrawerDefaultOptions,
   DrawerManager,
 } from '@drawerly/core'
-import type {
-  App,
-  Plugin,
-} from 'vue'
-import type {
-  VueDrawerOptions,
-} from './utils'
+import type { App, Plugin } from 'vue'
+import type { VueDrawerOptions } from './utils'
 
 import { createDrawerManager } from '@drawerly/core'
 import { defineComponent, h } from 'vue'
@@ -16,15 +11,15 @@ import { DrawerlyContainer } from './drawer-container'
 import { DrawerSymbol } from './utils'
 
 /**
- * Options accepted by {@link DrawerPlugin}.
+ * Configuration options for {@link DrawerPlugin}.
  *
  * @public
  */
 export interface DrawerPluginOptions {
   /**
-   * Default drawer options applied to all future instances.
+   * Global default options applied to new drawers.
    */
-  defaultOptions?: DrawerDefaultOptions<Omit<VueDrawerOptions, 'component'>>
+  defaultOptions?: DrawerDefaultOptions<VueDrawerOptions>
 
   /**
    * Teleport target for the drawer container.
@@ -42,8 +37,8 @@ export interface DrawerPluginOptions {
 }
 
 /**
- * Registers a global {@link DrawerManager} and the
- * {@link DrawerlyContainer} component.
+ * Vue plugin that registers a global {@link DrawerManager}
+ * and the {@link DrawerlyContainer} component.
  *
  * @public
  */
@@ -62,7 +57,8 @@ export const DrawerPlugin: Plugin = {
     )
 
     app.provide(DrawerSymbol, manager)
-    app.config.globalProperties.$drawerly = manager
+    // Expose as $drawerly on component instances for convenience.
+    ;(app.config.globalProperties as any).$drawerly = manager
 
     app.component(
       'DrawerlyContainer',
@@ -92,7 +88,7 @@ declare module 'vue' {
     $drawerly: DrawerManager<VueDrawerOptions>
   }
 
-  export interface GlobalComponents {
+  interface GlobalComponents {
     /**
      * Root container that renders the active drawer stack.
      */

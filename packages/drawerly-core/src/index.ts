@@ -1,21 +1,32 @@
 /**
- * Unique identifier for a drawer instance.
+ * Key used to identify a drawer instance.
  *
  * @public
  */
 export type DrawerKey = string
 
 /**
- * Drawer placement relative to the viewport.
+ * Placement of a drawer relative to the viewport.
  *
  * @public
  */
 export type DrawerPlacement = 'top' | 'right' | 'bottom' | 'left'
 
 /**
- * Base options used when opening a drawer.
+ * Predicate used for drawer behaviors.
  *
- * Framework adapters can extend this interface.
+ * Can be a boolean or a function that receives the drawer instance.
+ *
+ * @public
+ */
+export type DrawerPredicate<TInstance>
+  = | boolean
+    | ((instance: TInstance) => boolean)
+
+/**
+ * Shared options for all drawers.
+ *
+ * Adapters should extend this interface for framework-specific fields.
  *
  * @public
  */
@@ -26,43 +37,47 @@ export interface DrawerOptions {
   drawerKey: DrawerKey
 
   /**
-   * Drawer placement relative to the viewport.
+   * Drawer placement.
    *
    * @defaultValue 'right'
    */
   placement?: DrawerPlacement
 
   /**
-   * Controls whether pressing Escape closes the drawer.
+   * Whether pressing Escape closes the drawer.
+   *
+   * When a function is provided, it is called with the drawer instance.
    *
    * @defaultValue true
    */
-  closeOnEscapeKey?: boolean | ((instance: DrawerOptions) => boolean)
+  closeOnEscapeKey?: DrawerPredicate<this>
 
   /**
-   * Controls whether clicking the backdrop closes the drawer.
+   * Whether clicking the backdrop closes the drawer.
+   *
+   * When a function is provided, it is called with the drawer instance.
    *
    * @defaultValue true
    */
-  closeOnBackdropClick?: boolean | ((instance: DrawerOptions) => boolean)
+  closeOnBackdropClick?: DrawerPredicate<this>
 
   /**
-   * ARIA label applied to the drawer panel.
+   * ARIA label for the drawer panel.
    */
   ariaLabel?: string
 
   /**
-   * ARIA `describedby` reference applied to the drawer panel.
+   * ARIA `describedby` id for the drawer panel.
    */
   ariaDescribedBy?: string
 
   /**
-   * ARIA `labelledby` reference applied to the drawer panel.
+   * ARIA `labelledby` id for the drawer panel.
    */
   ariaLabelledBy?: string
 
   /**
-   * Extra data attributes applied to the drawer overlay element.
+   * Extra data attributes applied to the overlay element.
    */
   dataAttributes?: Record<
     `data-${string}`,
@@ -71,18 +86,38 @@ export interface DrawerOptions {
 }
 
 /**
- * Default options merged into all drawers when opened.
+ * Drawer options without the `drawerKey` field.
  *
- * Does not include `drawerKey`.
+ * @public
+ */
+export type DrawerOptionsWithoutKey<
+  TDrawerOptions extends DrawerOptions = DrawerOptions,
+> = Omit<TDrawerOptions, 'drawerKey'>
+
+/**
+ * Options of a drawer that can be updated at runtime.
+ *
+ * `drawerKey` is intentionally excluded.
+ *
+ * @public
+ */
+export type DrawerUpdatableOptions<
+  TDrawerOptions extends DrawerOptions = DrawerOptions,
+> = DrawerOptionsWithoutKey<TDrawerOptions>
+
+/**
+ * Default options applied to new drawers.
+ *
+ * Partial version of {@link DrawerUpdatableOptions}.
  *
  * @public
  */
 export type DrawerDefaultOptions<
   TDrawerOptions extends DrawerOptions = DrawerOptions,
-> = Omit<Partial<TDrawerOptions>, 'drawerKey'>
+> = Partial<DrawerOptionsWithoutKey<TDrawerOptions>>
 
 /**
- * A drawer instance is its full options object including `drawerKey`.
+ * Concrete drawer instance (full options including `drawerKey`).
  *
  * @public
  */
@@ -91,7 +126,7 @@ export type DrawerInstance<
 > = TDrawerOptions
 
 /**
- * Shape of the drawer manager state.
+ * Drawer manager state.
  *
  * @public
  */
@@ -99,7 +134,7 @@ export interface DrawerState<
   TDrawerOptions extends DrawerOptions = DrawerOptions,
 > {
   /**
-   * Current drawer stack. The last item is the top drawer.
+   * Current drawer stack. The last item is the topmost drawer.
    */
   stack: DrawerInstance<TDrawerOptions>[]
 }
@@ -114,14 +149,14 @@ export type DrawerListener<
 > = (state: DrawerState<TDrawerOptions>) => void
 
 /**
- * Function returned from `subscribe` to remove the listener.
+ * Function that unsubscribes a state listener.
  *
  * @public
  */
 export type Unsubscribe = () => void
 
 /**
- * Public API of the drawer manager.
+ * Public API for managing a stack of drawers.
  *
  * @public
  */
@@ -134,9 +169,11 @@ export interface DrawerManager<
   getState: () => DrawerState<TDrawerOptions>
 
   /**
-   * Returns a specific drawer instance by key.
+   * Returns a drawer instance by key, if it exists.
    */
-  getDrawerInstance: (key: DrawerKey) => DrawerInstance<TDrawerOptions> | undefined
+  getDrawerInstance: (
+    key: DrawerKey,
+  ) => DrawerInstance<TDrawerOptions> | undefined
 
   /**
    * Returns the current global default options.
@@ -149,17 +186,19 @@ export interface DrawerManager<
   subscribe: (listener: DrawerListener<TDrawerOptions>) => Unsubscribe
 
   /**
-   * Opens or updates a drawer and brings it to the top.
+   * Opens or updates a drawer and moves it to the top of the stack.
+   *
+   * Returns the drawer key.
    */
   open: (options: TDrawerOptions) => DrawerKey
 
   /**
-   * Closes the top drawer or a specific drawer by key.
+   * Closes the top drawer or the drawer with the given key.
    */
   close: (key?: DrawerKey) => void
 
   /**
-   * Brings the drawer with the given key to the top.
+   * Moves the drawer with the given key to the top of the stack.
    */
   bringToTop: (key: DrawerKey) => void
 
@@ -178,18 +217,21 @@ export interface DrawerManager<
   ) => void
 
   /**
-   * Updates options for a specific existing drawer.
+   * Updates options for an existing drawer.
+   *
+   * The updater receives the current options without `drawerKey`
+   * and must return the full updated options (still without `drawerKey`).
    */
   updateOptions: (
     key: DrawerKey,
     updater: (
-      prev: DrawerDefaultOptions<TDrawerOptions>,
-    ) => DrawerDefaultOptions<TDrawerOptions>,
+      prev: DrawerUpdatableOptions<TDrawerOptions>,
+    ) => DrawerUpdatableOptions<TDrawerOptions>,
   ) => void
 }
 
 /**
- * Creates a new drawer manager.
+ * Creates a new drawer manager backed by an in-memory stack.
  *
  * @public
  */
@@ -203,15 +245,14 @@ export function createDrawerManager<
     stack: initialState?.stack ? [...initialState.stack] : [],
   }
 
-  let defaults: DrawerDefaultOptions<TDrawerOptions> | undefined
-    = defaultOptions
-      ? {
-          placement: 'right',
-          closeOnEscapeKey: true,
-          closeOnBackdropClick: true,
-          ...defaultOptions,
-        }
-      : undefined
+  let defaults: DrawerDefaultOptions<TDrawerOptions> | undefined = defaultOptions
+    ? {
+        placement: 'right',
+        closeOnEscapeKey: true,
+        closeOnBackdropClick: true,
+        ...defaultOptions,
+      }
+    : undefined
 
   const listeners = new Set<DrawerListener<TDrawerOptions>>()
 
@@ -222,7 +263,9 @@ export function createDrawerManager<
 
   const getState = (): DrawerState<TDrawerOptions> => state
 
-  const getDrawerInstance = (key: DrawerKey): DrawerInstance<TDrawerOptions> | undefined => {
+  const getDrawerInstance = (
+    key: DrawerKey,
+  ): DrawerInstance<TDrawerOptions> | undefined => {
     return state.stack.find(d => d?.drawerKey === key)
   }
 
@@ -348,8 +391,8 @@ export function createDrawerManager<
   const updateOptions = (
     key: DrawerKey,
     updater: (
-      prev: DrawerDefaultOptions<TDrawerOptions>,
-    ) => DrawerDefaultOptions<TDrawerOptions>,
+      prev: DrawerUpdatableOptions<TDrawerOptions>,
+    ) => DrawerUpdatableOptions<TDrawerOptions>,
   ): void => {
     const { stack } = state
     const idx = findIndex(key, stack)
@@ -362,8 +405,8 @@ export function createDrawerManager<
 
     const { drawerKey, ...rest } = current
 
-    const next = updater(rest)
-    if (next === current)
+    const next = updater(rest as DrawerUpdatableOptions<TDrawerOptions>)
+    if (next === rest)
       return
 
     const updatedStack = stack.slice()
