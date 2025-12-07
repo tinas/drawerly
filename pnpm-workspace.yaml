@@ -1,6 +1,7 @@
 packages:
-  - packages/*
+  - 'packages/*'
   - docs
+  - '!playground'
 
 catalog:
   '@antfu/eslint-config': ^6.2.0

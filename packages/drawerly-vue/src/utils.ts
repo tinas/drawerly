@@ -1,11 +1,36 @@
+import type {
+  DrawerOptions as CoreDrawerOptions,
+  DrawerManager,
+} from '@drawerly/core'
+import type {
+  Component,
+  InjectionKey,
+} from 'vue'
+
 /**
- * Omit a set of keys from a type.
+ * Drawer options supported by the Vue adapter.
  *
- * Similar to the built-in `Omit<T, K>` but written as a mapped type to
- * avoid some of the IntelliSense quirks.
+ * @public
+ */
+export interface VueDrawerOptions extends CoreDrawerOptions {
+  /**
+   * Component rendered inside the drawer panel.
+   *
+   * Optional for headless usage.
+   */
+  component?: Component
+
+  /**
+   * Props passed to the rendered component.
+   */
+  componentParams?: Record<string, any>
+}
+
+/**
+ * Injection key for accessing the global drawer manager.
  *
  * @internal
  */
-export type OmitKeys<T, K extends keyof any> = {
-  [P in keyof T as P extends K ? never : P]: T[P]
-}
+export const DrawerSymbol: InjectionKey<
+  DrawerManager<VueDrawerOptions>
+> = Symbol('drawerly')

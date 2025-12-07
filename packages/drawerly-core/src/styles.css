@@ -4,7 +4,7 @@
   --drawerly-panel-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
   --drawerly-panel-width: 400px;
   --drawerly-panel-height: 300px;
-  --drawerly-panel-radius: 8px;
+  --drawerly-panel-radius: 16px;
   --drawerly-transition-duration: 300ms;
   --drawerly-transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
   --drawerly-z-index: 1000;

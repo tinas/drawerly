@@ -17,16 +17,16 @@ export default defineConfig({
       insertTypesEntry: true,
     }),
     {
-      name: 'copy-shared-css',
+      name: 'copy-css',
       closeBundle() {
         let srcCss: string
 
         try {
-          srcCss = require.resolve('@drawerly/shared/styles.css')
+          srcCss = require.resolve('@drawerly/core/styles.css')
         }
         catch {
           throw new Error(
-            '[@drawerly/vue] Could not resolve "@drawerly/shared/styles.css". Make sure @drawerly/shared is built and exported correctly.',
+            '[@drawerly/vue] Could not resolve "@drawerly/core/styles.css". Make sure @drawerly/core is built and exported correctly.',
           )
         }
 
@@ -34,7 +34,7 @@ export default defineConfig({
 
         if (!fs.existsSync(srcCss)) {
           throw new Error(
-            `[@drawerly/vue] Resolved styles.css from @drawerly/shared does not exist:\n${srcCss}`,
+            `[@drawerly/vue] Resolved styles.css from @drawerly/core does not exist:\n${srcCss}`,
           )
         }
 
@@ -50,7 +50,7 @@ export default defineConfig({
       formats: ['es', 'cjs'],
     },
     rollupOptions: {
-      external: ['vue', '@drawerly/core', '@drawerly/shared'],
+      external: ['vue', '@drawerly/core'],
       output: {
         exports: 'named',
         globals: {

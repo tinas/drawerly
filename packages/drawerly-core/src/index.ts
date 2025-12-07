@@ -1,44 +1,99 @@
 /**
  * Unique identifier for a drawer instance.
  *
- * Applications should use stable strings such as:
- * - "settings"
- * - "filters"
- * - "profile"
+ * @public
  */
 export type DrawerKey = string
 
 /**
+ * Drawer placement relative to the viewport.
+ *
+ * @public
+ */
+export type DrawerPlacement = 'top' | 'right' | 'bottom' | 'left'
+
+/**
  * Base options used when opening a drawer.
  *
- * Applications or framework adapters should extend this interface.
+ * Framework adapters can extend this interface.
+ *
+ * @public
  */
-export interface DrawerOptions extends Record<string, unknown> {
+export interface DrawerOptions {
   /**
    * Unique key identifying the drawer instance.
    */
   drawerKey: DrawerKey
+
+  /**
+   * Drawer placement relative to the viewport.
+   *
+   * @defaultValue 'right'
+   */
+  placement?: DrawerPlacement
+
+  /**
+   * Controls whether pressing Escape closes the drawer.
+   *
+   * @defaultValue true
+   */
+  closeOnEscapeKey?: boolean | ((instance: DrawerOptions) => boolean)
+
+  /**
+   * Controls whether clicking the backdrop closes the drawer.
+   *
+   * @defaultValue true
+   */
+  closeOnBackdropClick?: boolean | ((instance: DrawerOptions) => boolean)
+
+  /**
+   * ARIA label applied to the drawer panel.
+   */
+  ariaLabel?: string
+
+  /**
+   * ARIA `describedby` reference applied to the drawer panel.
+   */
+  ariaDescribedBy?: string
+
+  /**
+   * ARIA `labelledby` reference applied to the drawer panel.
+   */
+  ariaLabelledBy?: string
+
+  /**
+   * Extra data attributes applied to the drawer overlay element.
+   */
+  dataAttributes?: Record<
+    `data-${string}`,
+    string | number | boolean | null | undefined
+  >
 }
 
 /**
- * Represents a single drawer instance in the stack.
+ * Default options merged into all drawers when opened.
+ *
+ * Does not include `drawerKey`.
+ *
+ * @public
  */
-export interface DrawerInstance<
+export type DrawerDefaultOptions<
   TDrawerOptions extends DrawerOptions = DrawerOptions,
-> {
-  /**
-   * The drawer's identity.
-   */
-  drawerKey: DrawerKey
-
-  /**
-   * Options associated with this drawer instance.
-   */
-  options?: TDrawerOptions
-}
+> = Omit<Partial<TDrawerOptions>, 'drawerKey'>
 
 /**
- * Shape of the drawer manager's internal state.
+ * A drawer instance is its full options object including `drawerKey`.
+ *
+ * @public
+ */
+export type DrawerInstance<
+  TDrawerOptions extends DrawerOptions = DrawerOptions,
+> = TDrawerOptions
+
+/**
+ * Shape of the drawer manager state.
+ *
+ * @public
  */
 export interface DrawerState<
   TDrawerOptions extends DrawerOptions = DrawerOptions,
@@ -50,126 +105,130 @@ export interface DrawerState<
 }
 
 /**
- * Listener invoked whenever the drawer state changes.
+ * Listener called whenever the drawer state changes.
+ *
+ * @public
  */
 export type DrawerListener<
   TDrawerOptions extends DrawerOptions = DrawerOptions,
 > = (state: DrawerState<TDrawerOptions>) => void
 
 /**
- * Function returned from `subscribe` to stop receiving updates.
+ * Function returned from `subscribe` to remove the listener.
+ *
+ * @public
  */
 export type Unsubscribe = () => void
 
 /**
- * Public API for controlling a drawer stack.
+ * Public API of the drawer manager.
+ *
+ * @public
  */
 export interface DrawerManager<
   TDrawerOptions extends DrawerOptions = DrawerOptions,
 > {
   /**
-   * Returns the current drawer state synchronously.
+   * Returns the current drawer state.
    */
   getState: () => DrawerState<TDrawerOptions>
 
   /**
-   * Returns the current default options that will be merged into
-   * all future drawer instances.
+   * Returns a specific drawer instance by key.
    */
-  getDefaultOptions: () => TDrawerOptions | undefined
+  getDrawerInstance: (key: DrawerKey) => DrawerInstance<TDrawerOptions> | undefined
 
   /**
-   * Subscribes to drawer state changes.
-   *
-   * @param listener - Callback invoked whenever the state changes.
-   * @returns Function to unsubscribe the listener.
+   * Returns the current global default options.
+   */
+  getDefaultOptions: () => DrawerDefaultOptions<TDrawerOptions> | undefined
+
+  /**
+   * Subscribes to state changes.
    */
   subscribe: (listener: DrawerListener<TDrawerOptions>) => Unsubscribe
 
   /**
-   * Opens a drawer for the given key with the provided options.
-   *
-   * - If a drawer with this key does not exist, a new drawer is pushed
-   *   to the top of the stack.
-   * - If it exists, its options are updated and the drawer is moved
-   *   to the top of the stack.
-   *
-   * @param options - Options for the drawer instance.
-   * @returns The key of the opened drawer.
+   * Opens or updates a drawer and brings it to the top.
    */
   open: (options: TDrawerOptions) => DrawerKey
 
   /**
-   * Closes a drawer.
-   *
-   * - If a key is provided, closes the drawer with that key.
-   * - If no key is provided, closes the topmost drawer.
-   *
-   * @param key - Optional key of the drawer to close.
+   * Closes the top drawer or a specific drawer by key.
    */
   close: (key?: DrawerKey) => void
 
   /**
-   * Moves the drawer with the given key to the top of the stack.
-   * If no such drawer exists, nothing happens.
-   *
-   * @param key - Key of the drawer to promote.
+   * Brings the drawer with the given key to the top.
    */
   bringToTop: (key: DrawerKey) => void
 
   /**
-   * Closes all drawers and clears the stack.
+   * Closes all drawers.
    */
   closeAll: () => void
 
   /**
-   * Updates the default options used for all future drawer instances.
-   * Already opened drawers are not affected.
-   *
-   * @param updater - Function that receives the current default options
-   * and returns the new defaults.
+   * Updates the global default options used for future drawers.
+   */
+  updateDefaultOptions: (
+    updater: (
+      prev: DrawerDefaultOptions<TDrawerOptions> | undefined,
+    ) => DrawerDefaultOptions<TDrawerOptions>,
+  ) => void
+
+  /**
+   * Updates options for a specific existing drawer.
    */
   updateOptions: (
-    updater: (prev: TDrawerOptions | undefined) => TDrawerOptions,
+    key: DrawerKey,
+    updater: (
+      prev: DrawerDefaultOptions<TDrawerOptions>,
+    ) => DrawerDefaultOptions<TDrawerOptions>,
   ) => void
 }
 
 /**
  * Creates a new drawer manager.
  *
- * @typeParam TDrawerOptions - Drawer options type used by this manager.
- *
- * @param initialState - Optional initial state (useful for SSR hydration or tests).
- * @param defaultOptions - Default options applied to all future drawer instances.
- *
- * @returns A {@link DrawerManager} instance.
+ * @public
  */
 export function createDrawerManager<
   TDrawerOptions extends DrawerOptions = DrawerOptions,
 >(
   initialState?: Partial<DrawerState<TDrawerOptions>>,
-  defaultOptions?: TDrawerOptions,
+  defaultOptions?: DrawerDefaultOptions<TDrawerOptions>,
 ): DrawerManager<TDrawerOptions> {
   let state: DrawerState<TDrawerOptions> = {
-    stack: [],
-    ...initialState,
+    stack: initialState?.stack ? [...initialState.stack] : [],
   }
 
-  let defaults: TDrawerOptions | undefined = defaultOptions
-    ? ({ ...defaultOptions } as TDrawerOptions)
-    : undefined
+  let defaults: DrawerDefaultOptions<TDrawerOptions> | undefined
+    = defaultOptions
+      ? {
+          placement: 'right',
+          closeOnEscapeKey: true,
+          closeOnBackdropClick: true,
+          ...defaultOptions,
+        }
+      : undefined
 
   const listeners = new Set<DrawerListener<TDrawerOptions>>()
 
   const notify = (): void => {
-    for (const listener of listeners) {
+    for (const listener of listeners)
       listener(state)
-    }
   }
 
   const getState = (): DrawerState<TDrawerOptions> => state
 
-  const getDefaultOptions = (): TDrawerOptions | undefined => defaults
+  const getDrawerInstance = (key: DrawerKey): DrawerInstance<TDrawerOptions> | undefined => {
+    return state.stack.find(d => d?.drawerKey === key)
+  }
+
+  const getDefaultOptions = ():
+    | DrawerDefaultOptions<TDrawerOptions>
+    | undefined => defaults
 
   const subscribe = (
     listener: DrawerListener<TDrawerOptions>,
@@ -188,113 +247,86 @@ export function createDrawerManager<
 
   const findIndex = (
     key: DrawerKey,
-    stack: DrawerInstance<TDrawerOptions>[],
-  ): number => {
-    const len = stack.length
-    for (let i = 0; i < len; i++) {
-      const inst = stack[i]
-      if (inst && inst.drawerKey === key)
-        return i
-    }
-    return -1
-  }
+    stack: TDrawerOptions[],
+  ): number => stack.findIndex(d => d?.drawerKey === key)
 
   const moveToTop = (
-    stack: DrawerInstance<TDrawerOptions>[],
+    stack: TDrawerOptions[],
     index: number,
-    updated?: DrawerInstance<TDrawerOptions>,
-  ): DrawerInstance<TDrawerOptions>[] => {
+    updated?: TDrawerOptions,
+  ): TDrawerOptions[] => {
     const len = stack.length
     if (index < 0 || index >= len)
       return stack
 
     const instAtIndex = stack[index]
-    if (!instAtIndex)
+    if (instAtIndex === undefined)
       return stack
 
-    // Already top and unchanged
     if (index === len - 1 && !updated)
       return stack
 
-    const result: DrawerInstance<TDrawerOptions>[] = []
+    const result: TDrawerOptions[] = []
 
     for (let i = 0; i < len; i++) {
       if (i === index)
         continue
       const inst = stack[i]
-      if (inst)
+      if (inst !== undefined)
         result.push(inst)
     }
 
-    result.push(updated ?? instAtIndex)
+    const target = updated ?? instAtIndex
+    result.push(target)
     return result
   }
 
   const open = (options: TDrawerOptions): DrawerKey => {
     const key = options.drawerKey
-    const mergedOptions = mergeOptions(options)
+    const merged = mergeOptions(options)
 
-    const stack = state.stack
-    const index = findIndex(key, stack)
+    const idx = findIndex(key, state.stack)
 
-    if (index === -1) {
-      const instance: DrawerInstance<TDrawerOptions> = {
-        drawerKey: key,
-        options: mergedOptions,
-      }
-      state = { stack: [...stack, instance] }
+    if (idx === -1) {
+      state = { stack: [...state.stack, merged] }
       notify()
       return key
     }
 
-    const updated: DrawerInstance<TDrawerOptions> = {
-      drawerKey: key,
-      options: mergedOptions,
-    }
-
-    const nextStack = moveToTop(stack, index, updated)
-    state = { stack: nextStack }
+    state = { stack: moveToTop(state.stack, idx, merged) }
     notify()
     return key
   }
 
   const close = (key?: DrawerKey): void => {
-    const stack = state.stack
-    const len = stack.length
-    if (!len)
+    const { stack } = state
+    if (!stack.length)
       return
 
     if (!key) {
-      state = { stack: stack.slice(0, len - 1) }
+      state = { stack: stack.slice(0, stack.length - 1) }
       notify()
       return
     }
 
-    const next: DrawerInstance<TDrawerOptions>[] = []
-    for (let i = 0; i < len; i++) {
-      const inst = stack[i]
-      if (inst && inst.drawerKey !== key)
-        next.push(inst)
+    const filtered = stack.filter(d => d?.drawerKey !== key)
+    if (filtered.length !== stack.length) {
+      state = { stack: filtered }
+      notify()
     }
-
-    if (next.length === len)
-      return
-    state = { stack: next }
-    notify()
   }
 
   const bringToTop = (key: DrawerKey): void => {
-    const stack = state.stack
+    const { stack } = state
     const len = stack.length
     if (len < 2)
       return
 
-    const index = findIndex(key, stack)
-    if (index === -1 || index === len - 1)
+    const idx = findIndex(key, stack)
+    if (idx === -1 || idx === len - 1)
       return
 
-    const nextStack = moveToTop(stack, index)
-    state = { stack: nextStack }
+    state = { stack: moveToTop(stack, idx) }
     notify()
   }
 
@@ -305,20 +337,51 @@ export function createDrawerManager<
     notify()
   }
 
-  const updateOptions = (
-    updater: (prev: TDrawerOptions | undefined) => TDrawerOptions,
+  const updateDefaultOptions = (
+    updater: (
+      prev: DrawerDefaultOptions<TDrawerOptions> | undefined,
+    ) => DrawerDefaultOptions<TDrawerOptions>,
   ): void => {
     defaults = updater(defaults)
   }
 
+  const updateOptions = (
+    key: DrawerKey,
+    updater: (
+      prev: DrawerDefaultOptions<TDrawerOptions>,
+    ) => DrawerDefaultOptions<TDrawerOptions>,
+  ): void => {
+    const { stack } = state
+    const idx = findIndex(key, stack)
+    if (idx === -1)
+      return
+
+    const current = stack[idx]
+    if (current === undefined)
+      return
+
+    const { drawerKey, ...rest } = current
+
+    const next = updater(rest)
+    if (next === current)
+      return
+
+    const updatedStack = stack.slice()
+    updatedStack[idx] = { drawerKey, ...next } as TDrawerOptions
+    state = { stack: updatedStack }
+    notify()
+  }
+
   return {
     getState,
+    getDrawerInstance,
     getDefaultOptions,
     subscribe,
     open,
     close,
     bringToTop,
     closeAll,
+    updateDefaultOptions,
     updateOptions,
   }
 }
