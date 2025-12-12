@@ -1,0 +1,100 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: What do you want to run?
+        type: choice
+        required: true
+        default: version
+        options:
+          - version # opens/updates the version PR (does not publish)
+          - dry-run # runs publish in dry-run mode (does not publish)
+          - publish # publishes to npm (only allowed from main)
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  id-token: write
+  pull-requests: write
+
+jobs:
+  release:
+    name: Release
+    if: github.repository_owner == 'tinas'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.24.0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm run lint
+
+      - name: Typecheck
+        run: pnpm run typecheck
+
+      - name: Run Tests
+        run: pnpm run test:ci
+
+      - name: Build packages
+        run: pnpm run build
+
+      # HARD SAFETY GATE (fail loudly)
+      - name: Block publish on non-main
+        if: ${{ inputs.mode == 'publish' && github.ref_name != 'main' }}
+        run: |
+          echo "Publish is only allowed from the main branch."
+          echo "Current branch: ${{ github.ref_name }}"
+          exit 1
+
+      # Version PR flow (no publish)
+      - name: Run Changesets (version)
+        if: ${{ inputs.mode == 'version' }}
+        uses: changesets/action@v1.5.3
+        with:
+          version: pnpm run changeset:version
+          commit: 'ci: Version Packages'
+          title: 'ci: Version Packages'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Dry-run publish (no publish)
+      - name: Run Changesets (publish dry-run)
+        if: ${{ inputs.mode == 'dry-run' }}
+        run: pnpm run changeset:publish:dry-run
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      # Real publish (only on main due to gate above)
+      - name: Run Changesets (publish)
+        if: ${{ inputs.mode == 'publish' && github.ref_name == 'main' }}
+        uses: changesets/action@v1.5.3
+        with:
+          publish: pnpm run changeset:publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

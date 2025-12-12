@@ -3,6 +3,7 @@
   "type": "module",
   "version": "0.0.0",
   "private": true,
+  "packageManager": "pnpm@10.24.0",
   "author": "Ahmet Tınastepe",
   "scripts": {
     "build": "pnpm -r --filter './packages/*' run build",
@@ -10,10 +11,18 @@
     "lint": "eslint",
     "lint:fix": "eslint --fix",
     "typecheck": "pnpm -r --filter './packages/*' run typecheck",
-    "clean": "pnpm -r --filter './packages/*' run clean && rm -rf node_modules"
+    "clean": "pnpm -r --filter './packages/*' run clean && rm -rf node_modules",
+    "test:lib": "pnpm -r --filter './packages/*' run test:lib",
+    "test:ci": "pnpm run test:lib",
+    "changeset": "changeset",
+    "changeset:version": "changeset version && pnpm install --lockfile-only",
+    "changeset:publish": "changeset publish",
+    "changeset:publish:dry-run": "changeset publish --dry-run",
+    "release": "pnpm build && pnpm changeset:publish"
   },
   "devDependencies": {
     "@antfu/eslint-config": "catalog:",
+    "@changesets/cli": "catalog:",
     "eslint": "catalog:",
     "typescript": "catalog:",
     "vite": "catalog:",
