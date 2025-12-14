@@ -1,7 +1,7 @@
 {
   "name": "@drawerly/core",
   "type": "module",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "author": "Ahmet Tınastepe",
   "license": "MIT",
   "keywords": [
