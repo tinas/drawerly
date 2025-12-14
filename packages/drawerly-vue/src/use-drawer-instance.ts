@@ -110,9 +110,7 @@ export function useDrawerInstance<
 ): UseDrawerInstanceResult<TVueDrawerOptions> {
   const manager = useDrawerContext<TVueDrawerOptions>()
 
-  const instance = shallowRef<DrawerInstance<TVueDrawerOptions> | undefined>(
-    undefined,
-  )
+  const instance = shallowRef<DrawerInstance<TVueDrawerOptions> | undefined>(undefined)
 
   const instanceKey = computed(() => toValue(drawerKey))
 
@@ -144,19 +142,20 @@ export function useDrawerInstance<
     })
   })
 
-  onBeforeUnmount(() => {
-    unsubscribe?.()
-    unsubscribe = null
-  })
-
   // Keep the instance in sync when the key changes.
-  watch(
+  const stopWatch = watch(
     instanceKey,
-    () => {
-      instance.value = manager.getDrawerInstance(instanceKey.value)
+    (newInstanceKey) => {
+      instance.value = manager.getDrawerInstance(newInstanceKey)
     },
     { immediate: true },
   )
+
+  onBeforeUnmount(() => {
+    stopWatch()
+    unsubscribe?.()
+    unsubscribe = null
+  })
 
   const isOpen = computed(() => Boolean(instance.value))
 

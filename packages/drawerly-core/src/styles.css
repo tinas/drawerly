@@ -1,12 +1,19 @@
 [data-drawerly-root] {
+  /* Backdrop */
   --drawerly-backdrop-bg: rgba(0, 0, 0, 0.5);
+  
+  /* Panel appearance */
   --drawerly-panel-bg: white;
   --drawerly-panel-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
   --drawerly-panel-width: 400px;
   --drawerly-panel-height: 300px;
   --drawerly-panel-radius: 16px;
+  
+  /* Animations */
   --drawerly-transition-duration: 300ms;
   --drawerly-transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* Layering */
   --drawerly-z-index: 1000;
 }
 

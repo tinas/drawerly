@@ -3,29 +3,29 @@ layout: home
 
 hero:
   name: "Drawerly"
-  text: "Global Drawer Orchestration"
-  tagline: A lightweight, stack-driven way to manage drawers
+  text: "Unified Drawer Stack"
+  tagline: Manage multiple drawers with a unified stack and style it your way.
   image:
     src: /logo.svg
     alt: Drawerly Logo
   actions:
     - theme: brand
       text: Get Started
-      link: /
+      link: /guide/overview
     - theme: alt
-      text: Demo
-      link: /
+      text: Vue Guide
+      link: /vue/getting-started
 
 features:
-  - title: Predictable Drawer Flow
+  - title: Manage Multiple Drawers
     icon: 🧱
-    details: Build consistent drawer experiences with a clean stack-driven pattern. Every push, pop and transition behaves the same.
+    details: Open, close, and reorder drawers with simple API calls. The stack keeps everything synchronized and predictable.
 
-  - title: Unified App-Level Control
-    icon: 🌐
-    details: All drawers are coordinated through a centralized layer. This eliminates prop chaining and scattered logic and ensures everything stays synchronized.
+  - title: Framework-Agnostic Core
+    icon: 🧭
+    details: Built on a framework-agnostic core. Use the Vue adapter today or build your own adapter for any framework.
 
-  - title: Headless Architecture
-    icon: 🧩
-    details: Drawerly manages behavior only. You are free to use any UI components, styles or design systems without restrictions.
+  - title: Style It Your Way
+    icon: 🎨
+    details: Use the included styles, customize with CSS variables, or go fully headless and build your own UI from scratch.
 ---

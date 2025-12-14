@@ -6,7 +6,7 @@
   "packageManager": "pnpm@10.24.0",
   "author": "Ahmet Tınastepe",
   "scripts": {
-    "build": "pnpm -r --filter './packages/*' run build",
+    "build": "pnpm -r --filter './packages/*' --parallel run build",
     "dev": "pnpm -r --filter './packages/*' --parallel run dev",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
@@ -14,6 +14,8 @@
     "clean": "pnpm -r --filter './packages/*' run clean && rm -rf node_modules",
     "test:lib": "pnpm -r --filter './packages/*' run test:lib",
     "test:ci": "pnpm run test:lib",
+    "docs:dev": "pnpm -C docs run docs:dev",
+    "docs:build": "pnpm run --filter {./docs}... docs:build",
     "changeset": "changeset",
     "changeset:version": "changeset version && pnpm install --lockfile-only",
     "changeset:publish": "changeset publish",

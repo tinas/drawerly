@@ -36,9 +36,15 @@ vi.mock('vue', () => {
     }
   }
 
-  const watch = (_source: any, cb: () => void, _options?: any) => {
-    // For these tests we only care about the immediate call
-    cb()
+  const watch = (source: any, cb: (newVal: any, oldVal: any) => void, options?: any) => {
+    // Read the current value from the source (could be a ref or computed)
+    const currentValue = source.value !== undefined ? source.value : source
+
+    // Call immediately if requested
+    if (options?.immediate) {
+      cb(currentValue, undefined)
+    }
+
     return () => {}
   }
 

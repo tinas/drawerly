@@ -132,11 +132,9 @@ export const DrawerlyContainer = defineComponent({
       syncNextTopWithStack(nextState.stack)
     }
 
-    /**
-     * When `closeAll` is called, we want to animate all drawers out instead of
-     * unmounting them immediately. We keep the previous stack for rendering
-     * and mark all keys as "closing".
-     */
+    // When `closeAll` is called, we want to animate all drawers out instead of
+    // unmounting them immediately. We keep the previous stack for rendering
+    // and mark all keys as "closing".
     const startCloseAllAnimation = (prevState: ManagerState): void => {
       const prevStack = prevState.stack
       if (!prevStack.length)

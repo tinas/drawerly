@@ -12,9 +12,18 @@ catalogs:
     '@changesets/cli':
       specifier: ^2.29.8
       version: 2.29.8
+    '@vitejs/plugin-vue':
+      specifier: ^5.2.1
+      version: 5.2.4
+    '@vue/test-utils':
+      specifier: ^2.4.6
+      version: 2.4.6
     eslint:
       specifier: ^9.39.1
       version: 9.39.1
+    jsdom:
+      specifier: ^27.2.0
+      version: 27.2.0
     typescript:
       specifier: ^5.9.3
       version: 5.9.3
@@ -24,6 +33,21 @@ catalogs:
     vite-plugin-dts:
       specifier: ^4.5.4
       version: 4.5.4
+    vitepress:
+      specifier: ^1.6.4
+      version: 1.6.4
+    vitepress-plugin-group-icons:
+      specifier: ^1.6.5
+      version: 1.6.5
+    vitest:
+      specifier: 4.0.15
+      version: 4.0.15
+    vue:
+      specifier: 3.5.24
+      version: 3.5.24
+    vue-tsc:
+      specifier: ^2.2.0
+      version: 2.2.12
 
 importers:
 
@@ -31,7 +55,7 @@ importers:
     devDependencies:
       '@antfu/eslint-config':
         specifier: 'catalog:'
-        version: 6.2.0(@vue/compiler-sfc@3.5.24)(eslint-plugin-format@1.1.0(eslint@9.39.1))(eslint@9.39.1)(typescript@5.9.3)(vitest@4.0.15(@types/node@24.10.1)(jsdom@27.2.0)(yaml@2.8.1))
+        version: 6.2.0(@vue/compiler-sfc@3.5.25)(eslint-plugin-format@1.1.0(eslint@9.39.1))(eslint@9.39.1)(typescript@5.9.3)(vitest@4.0.15(@types/node@24.10.1)(jsdom@27.2.0)(yaml@2.8.1))
       '@changesets/cli':
         specifier: 'catalog:'
         version: 2.29.8(@types/node@24.10.1)
@@ -1241,8 +1265,14 @@ packages:
   '@vue/compiler-sfc@3.5.24':
     resolution: {integrity: sha512-8EG5YPRgmTB+YxYBM3VXy8zHD9SWHUJLIGPhDovo3Z8VOgvP+O7UP5vl0J4BBPWYD9vxtBabzW1EuEZ+Cqs14g==}
 
+  '@vue/compiler-sfc@3.5.25':
+    resolution: {integrity: sha512-PUgKp2rn8fFsI++lF2sO7gwO2d9Yj57Utr5yEsDf3GNaQcowCLKL7sf+LvVFvtJDXUp/03+dC6f2+LCv5aK1ag==}
+
   '@vue/compiler-ssr@3.5.24':
     resolution: {integrity: sha512-trOvMWNBMQ/odMRHW7Ae1CdfYx+7MuiQu62Jtu36gMLXcaoqKvAyh+P73sYG9ll+6jLB6QPovqoKGGZROzkFFg==}
+
+  '@vue/compiler-ssr@3.5.25':
+    resolution: {integrity: sha512-ritPSKLBcParnsKYi+GNtbdbrIE1mtuFEJ4U1sWeuOMlIziK5GtOL85t5RhsNy4uWIXPgk+OUdpnXiTdzn8o3A==}
 
   '@vue/compiler-vue2@2.7.16':
     resolution: {integrity: sha512-qYC3Psj9S/mfu9uVi5WvNZIzq+xnXMhOwbTFKKDD7b1lhpnn71jXSFdTQ+WsIEk0ONCd7VV2IMm7ONl6tbQ86A==}
@@ -3378,7 +3408,7 @@ snapshots:
     dependencies:
       '@algolia/client-common': 5.45.0
 
-  '@antfu/eslint-config@6.2.0(@vue/compiler-sfc@3.5.24)(eslint-plugin-format@1.1.0(eslint@9.39.1))(eslint@9.39.1)(typescript@5.9.3)(vitest@4.0.15(@types/node@24.10.1)(jsdom@27.2.0)(yaml@2.8.1))':
+  '@antfu/eslint-config@6.2.0(@vue/compiler-sfc@3.5.25)(eslint-plugin-format@1.1.0(eslint@9.39.1))(eslint@9.39.1)(typescript@5.9.3)(vitest@4.0.15(@types/node@24.10.1)(jsdom@27.2.0)(yaml@2.8.1))':
     dependencies:
       '@antfu/install-pkg': 1.1.0
       '@clack/prompts': 0.11.0
@@ -3409,7 +3439,7 @@ snapshots:
       eslint-plugin-unused-imports: 4.3.0(@typescript-eslint/eslint-plugin@8.48.0(@typescript-eslint/parser@8.48.0(eslint@9.39.1)(typescript@5.9.3))(eslint@9.39.1)(typescript@5.9.3))(eslint@9.39.1)
       eslint-plugin-vue: 10.6.2(@stylistic/eslint-plugin@5.6.1(eslint@9.39.1))(@typescript-eslint/parser@8.48.0(eslint@9.39.1)(typescript@5.9.3))(eslint@9.39.1)(vue-eslint-parser@10.2.0(eslint@9.39.1))
       eslint-plugin-yml: 1.19.0(eslint@9.39.1)
-      eslint-processor-vue-blocks: 2.0.0(@vue/compiler-sfc@3.5.24)(eslint@9.39.1)
+      eslint-processor-vue-blocks: 2.0.0(@vue/compiler-sfc@3.5.25)(eslint@9.39.1)
       globals: 16.5.0
       jsonc-eslint-parser: 2.4.1
       local-pkg: 1.1.2
@@ -4467,10 +4497,27 @@ snapshots:
       postcss: 8.5.6
       source-map-js: 1.2.1
 
+  '@vue/compiler-sfc@3.5.25':
+    dependencies:
+      '@babel/parser': 7.28.5
+      '@vue/compiler-core': 3.5.25
+      '@vue/compiler-dom': 3.5.25
+      '@vue/compiler-ssr': 3.5.25
+      '@vue/shared': 3.5.25
+      estree-walker: 2.0.2
+      magic-string: 0.30.21
+      postcss: 8.5.6
+      source-map-js: 1.2.1
+
   '@vue/compiler-ssr@3.5.24':
     dependencies:
       '@vue/compiler-dom': 3.5.24
       '@vue/shared': 3.5.24
+
+  '@vue/compiler-ssr@3.5.25':
+    dependencies:
+      '@vue/compiler-dom': 3.5.25
+      '@vue/shared': 3.5.25
 
   '@vue/compiler-vue2@2.7.16':
     dependencies:
@@ -5146,9 +5193,9 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-processor-vue-blocks@2.0.0(@vue/compiler-sfc@3.5.24)(eslint@9.39.1):
+  eslint-processor-vue-blocks@2.0.0(@vue/compiler-sfc@3.5.25)(eslint@9.39.1):
     dependencies:
-      '@vue/compiler-sfc': 3.5.24
+      '@vue/compiler-sfc': 3.5.25
       eslint: 9.39.1
 
   eslint-scope@8.4.0:
