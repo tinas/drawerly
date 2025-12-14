@@ -24,6 +24,7 @@
   },
   "devDependencies": {
     "@antfu/eslint-config": "catalog:",
+    "@changesets/changelog-github": "catalog:",
     "@changesets/cli": "catalog:",
     "eslint": "catalog:",
     "typescript": "catalog:",
