@@ -24,13 +24,13 @@ const manager = createDrawerManager<MyDrawerOptions>()
 
 manager.open({
   drawerKey: 'drawer-1',
-  // ... your custom options
+  // ... custom options
 })
 ```
 
 ### Opening Multiple Drawers
 
-You can open multiple drawers, and they'll stack on top of each other:
+Multiple drawers can be opened, stacking on top of each other:
 
 ```ts
 // First drawer opens
@@ -57,7 +57,7 @@ manager.open({
 
 ### Update Existing Drawer
 
-If you call `open()` with a `drawerKey` that already exists, the drawer moves to the top and its options update:
+When `open()` is called with an existing `drawerKey`, the drawer moves to the top and its options are updated:
 
 ```ts
 // Open initial drawer
@@ -107,8 +107,8 @@ manager.close('drawer-2')
 
 This is useful when:
 - A background process completes
-- A drawer becomes irrelevant due to user action elsewhere
-- You want to close a specific drawer without affecting others
+- A drawer becomes irrelevant due to user action is elsewhere
+- Closing a specific drawer is required without affecting others
 
 ### Close All Drawers
 
@@ -214,7 +214,7 @@ const unsubscribe = manager.subscribe((state) => {
   console.log('Stack changed!')
   console.log(`Now ${state.stack.length} drawer(s) open`)
 
-  // Update your UI based on the new state
+  // Update the UI, based on the new state
   renderDrawers(state.stack)
 })
 
@@ -233,7 +233,7 @@ The subscription callback fires when:
 
 ### Multiple Subscribers
 
-You can have multiple listeners for different purposes:
+Multiple listeners can be registered for different purposes:
 
 ```ts
 // Update the UI
@@ -420,7 +420,7 @@ function showNotification(id: string, message: string) {
 
 ### Limiting Stack Depth
 
-For most applications, you should limit how many drawers can stack:
+Most applications should impose limits on the number of drawers that can stack:
 
 ```ts
 const MAX_STACK_DEPTH = 3
@@ -460,7 +460,7 @@ manager.subscribe((state) => {
 
 **Clean Up Subscriptions**: Always unsubscribe when components unmount to prevent memory leaks.
 
-**Batch Operations**: If you need to make multiple changes, consider using `closeAll()` and reopening rather than closing individually.
+**Batch Operations**: For multiple changes, using `closeAll()` and reopening is preferable to closing individually.
 
 **Preserve Order**: When reordering is important, use `bringToTop()` rather than closing and reopening.
 
@@ -475,4 +475,4 @@ if (state.stack.length > 0) {
 }
 ```
 
-**Communicate State**: Use the subscription system to keep your UI in sync with the drawer stack.
+**Communicate State**: The subscription system should be utilized to maintain UI synchronization with the drawer stack.

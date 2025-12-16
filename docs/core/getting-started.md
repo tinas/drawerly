@@ -2,7 +2,7 @@
 
 ## Installation
 
-Install `@drawerly/core` with your favorite package manager:
+Install `@drawerly/core` with preferred package manager:
 
 :::code-group
 ```bash [pnpm]
@@ -20,17 +20,17 @@ yarn add @drawerly/core
 
 ## Importing Styles
 
-`@drawerly/core` also provives optional default styles for drawers. You can import these styles into your project as follows:
+`@drawerly/core` also provives optional default styles for drawers. To import these styles into the project, add the following import statement:
 
 ```ts
 import '@drawerly/core/styles.css'
 ```
 
-These styles provide a basic look and feel for the drawers, but you can customize them further by overriding the CSS variables defined in the stylesheet.
+These styles provide a basic look and feel for the drawers. Additional customization may be achieved by overriding the CSS variables defined in the stylesheet.
 
 ## Usage
 
-After installation, you can start using `@drawerly/core` in your project. Let's look at a basic example of how to create a drawer manager and open a drawer:
+After installation, `@drawerly/core` is ready to be used in the project. The following example demonstrates how to create a drawer manager and open a drawer:
 
 ```ts
 import { createDrawerManager } from '@drawerly/core'
@@ -54,7 +54,7 @@ manager.close('example-drawer')
 
 ### Customizing Styles
 
-You can customize the appearance of the drawers by overriding the CSS variables defined in the default stylesheet. For example, to change the background color and width of the drawers, you can add the following CSS to your project:
+The appearance of drawers can be customized by overriding the CSS variables defined in the default stylesheet. The following example demonstrates how to modify the background color and dimensions of the drawers:
 
 ```css
 @import '@drawerly/core/styles.css';

@@ -1,24 +1,24 @@
 # Defining Drawers
 
-The core package provides a framework-agnostic drawer management system that supports **extensible, type-safe custom options**. This guide shows you how to extend the base drawer configuration with your own properties to create drawers tailored to your application's needs.
+The core package provides a framework-agnostic drawer management system that supports **extensible, type-safe custom options**. This guide demonstrates how to extend the base drawer configuration with custom properties to create drawers tailored to specific application requirements.
 
 ## The Concept
 
-Every drawer in the system has a set of built-in options like `drawerKey`, `placement`, and accessibility properties. But real applications need more (you might want to pass product data, user information, or custom callbacks to your drawers).
+Every drawer in the system has a set of built-in options like `drawerKey`, `placement`, and accessibility properties. However, real applications require additional capabilities, such as passing product data, user information, or custom callbacks to drawers.
 
-The core package is designed to let you **extend** the base drawer options with any properties you need, while maintaining full type safety. Your custom fields become part of the drawer's identity and are available everywhere you interact with that drawer.
+The core package supports extension of the base drawer options with arbitrary properties while maintaining full type safety. Custom fields become part of the drawer's identity and remain accessible throughout all interactions with that drawer.
 
 ## Why Extend Drawer Options?
 
-In traditional drawer implementations, you might store drawer-related data separately from the drawer state. This creates synchronization issues and makes your code harder to maintain. By extending drawer options, you get:
+In conventional drawer implementations, drawer-related data is often stored separately from the drawer state. This approach creates synchronization issues and increases maintenance complexity. Extending drawer options provides the following benefits:
 
 **Single Source of Truth**: All data related to a drawer lives together in one place.
 
-**Type Safety**: TypeScript ensures you never access properties that don't exist or forget required fields.
+**Type Safety**: TypeScript prevents access to non-existent properties and enforces the presence of all required fields.
 
-**Flexibility**: Add any data structure your application needs (primitives, objects, functions, etc.).
+**Flexibility**: Supports arbitrary data structures including primitives, complex objects, and function references.
 
-**Framework Independence**: The core package doesn't impose UI constraints. You define what data matters.
+**Framework Independence**: The core package imposes no UI constraints, allowing developers to define application-specific data requirements.
 
 ## Extending the Base Options
 
@@ -33,7 +33,7 @@ The base interface provides essential drawer functionality:
 - `ariaLabel`, `ariaDescribedBy`, `ariaLabelledBy`: Accessibility attributes
 - `dataAttributes`: Custom data attributes for styling or testing
 
-These options handle the mechanics of drawer behavior and accessibility. Your extensions add domain-specific data.
+These options handle the mechanics of drawer behavior and accessibility. Extensions add domain-specific data.
 
 ### Creating Custom Drawer Types
 
@@ -43,20 +43,20 @@ To extend the base options, create an interface that extends `DrawerOptions`:
 import type { DrawerOptions } from '@drawerly/core'
 
 interface MyCustomDrawerOptions extends DrawerOptions {
-  // Add your custom fields here
+  // Add custom fields to here
   title: string
   data: any
   onAction?: () => void
 }
 ```
 
-Now every drawer using `MyCustomDrawerOptions` will have both the built-in options and your custom fields.
+Now every drawer using `MyCustomDrawerOptions` will have both the built-in options and defined custom fields.
 
 ## Practical Examples
 
 ### E-commerce Product Drawer
 
-For an e-commerce application, you might need product details and purchase actions:
+E-commerce applications typically require product details and purchase action handlers:
 
 ```ts
 interface ProductDrawerOptions extends DrawerOptions {
@@ -127,7 +127,7 @@ interface NotificationDrawerOptions extends DrawerOptions {
 
 ## Creating a Typed Manager
 
-Once you've defined your custom options, create a manager typed to those options:
+After defining custom options, instantiate a manager with the appropriate type parameters:
 
 ```ts
 import { createDrawerManager } from '@drawerly/core'
@@ -137,11 +137,11 @@ const userDrawers = createDrawerManager<UserDrawerOptions>()
 const notificationDrawers = createDrawerManager<NotificationDrawerOptions>()
 ```
 
-Each manager is now fully typed to its specific drawer type. TypeScript will enforce that you provide the correct fields when opening drawers.
+Each manager instance is fully typed to its corresponding drawer type. TypeScript enforces compile-time validation, ensuring all required fields are provided when opening drawers.
 
 ## Default Options
 
-You can set default values that apply to all drawers of a specific type:
+Default values can be configured to apply to all drawers of a specific type:
 
 ```ts
 const productDrawers = createDrawerManager<ProductDrawerOptions>(
@@ -151,12 +151,12 @@ const productDrawers = createDrawerManager<ProductDrawerOptions>(
     placement: 'right',
     closeOnEscapeKey: true,
     closeOnBackdropClick: true,
-    inStock: true // Your custom default
+    inStock: true // Custom default value
   }
 )
 ```
 
-When you open a drawer, these defaults merge with the options you provide. You only need to specify what's different:
+When opening a drawer, these defaults merge with the provided options. Only values that differ from the defaults need to be specified:
 
 ```ts
 productDrawers.open({
@@ -170,7 +170,7 @@ productDrawers.open({
 
 ## Dynamic Predicates
 
-The `closeOnEscapeKey` and `closeOnBackdropClick` options can be functions that receive the drawer instance. This lets you make decisions based on your custom data:
+The `closeOnEscapeKey` and `closeOnBackdropClick` options accept functions that receive the drawer instance, enabling conditional behavior based on custom data:
 
 ```ts
 productDrawers.open({
@@ -180,17 +180,17 @@ productDrawers.open({
   price: 2499.99,
   inStock: false,
 
-  // Conditional behavior based on your custom fields
+  // Conditional behavior based on custom fields
   closeOnEscapeKey: drawer => drawer.inStock === true,
   closeOnBackdropClick: drawer => drawer.price < 1000
 })
 ```
 
-When the drawer is expensive or out of stock, you can prevent accidental closes by making the predicate return `false`.
+For expensive or out-of-stock items, accidental closure can be prevented by configuring the predicate to return `false`.
 
 ## Type Safety in Action
 
-TypeScript ensures your custom fields are always available and correctly typed:
+TypeScript ensures custom fields remain consistently available with proper type validation:
 
 ```ts
 // Opening a drawer - TypeScript requires all fields
@@ -225,7 +225,7 @@ productDrawers.updateOptions('product-456', current => ({
 
 ### Component-Based Drawers
 
-If your framework uses components, you can reference them in your options:
+For component-based frameworks, component references can be included in the options:
 
 ```ts
 interface ComponentDrawerOptions extends DrawerOptions {
@@ -279,7 +279,7 @@ manager.open({
   createdAt: new Date()
 })
 
-// Implement auto-close in your application code
+// Implementation of auto-close behavior in application code
 manager.subscribe((state) => {
   state.stack.forEach((drawer) => {
     if (drawer.autoCloseAfter) {
@@ -291,4 +291,4 @@ manager.subscribe((state) => {
 })
 ```
 
-By defining custom drawer types that extend the base `DrawerOptions`, you create a flexible, type-safe system that adapts to your application's specific needs. The drawer manager handles state management and stack operations, while your extended types ensure all the domain-specific data is properly structured and accessible throughout your application. This separation of concerns keeps your code organized and makes it easier to build complex, multi-drawer experiences.
+Extending the base `DrawerOptions` with custom types creates a flexible, type-safe system that adapts to application-specific needs. The drawer manager handles state management and stack operations, while extended types maintain all domain-specific data in a properly structured and accessible format. This separation of concerns promotes code organization and simplifies the development of complex, multi-drawer experiences.
