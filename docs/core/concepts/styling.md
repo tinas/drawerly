@@ -1,6 +1,6 @@
 # Styling
 
-The core package includes a complete, customizable CSS styling system. While the package is framework-agnostic and focuses on state management, it provides default styles that you can use as-is or customize to match your design system.
+The core package includes a complete, customizable CSS styling system. While the package is framework-agnostic and focuses on state management, it provides default styles that can be used as-is or customized to match any design system.
 
 ## The Styling Approach
 
@@ -18,7 +18,7 @@ The styling system is built on:
 
 ### Import the CSS
 
-If you're using a bundler that handles CSS imports:
+When using a bundler that handles CSS imports:
 
 ```ts
 import '@drawerly/core/styles.css'
@@ -26,7 +26,7 @@ import '@drawerly/core/styles.css'
 
 ### Link in HTML
 
-Or include it in your HTML:
+Alternatively, include it in HTML:
 
 ```html
 <link rel="stylesheet" href="node_modules/@drawerly/core/dist/styles.css">
@@ -34,7 +34,7 @@ Or include it in your HTML:
 
 ### Copy and Customize
 
-For full control, copy the styles into your project and modify them directly.
+For full control, the styles can be copied into the project and modified directly.
 
 ## CSS Architecture
 
@@ -89,7 +89,7 @@ The default styles define these CSS variables on `[data-drawerly-root]`:
 
 ### Basic Customization
 
-Override variables in your own CSS:
+Variables can be overridden in custom CSS:
 
 ```css
 [data-drawerly-root] {
@@ -373,7 +373,7 @@ Make stacked drawers visible behind the top drawer:
 
 ### Internal Padding
 
-The panel itself has no internal padding by default. Add it based on your needs:
+The panel has no internal padding by default. Padding can be added as needed:
 
 ```css
 [data-drawerly-panel] {
@@ -411,7 +411,7 @@ The panel itself has no internal padding by default. Add it based on your needs:
 
 ### Header and Footer
 
-If your drawers have headers and footers:
+For drawers with headers and footers:
 
 ```css
 [data-drawerly-panel] {
@@ -542,11 +542,11 @@ manager.updateOptions('my-drawer', current => ({
 
 **Use CSS Variables**: Always customize through variables first before overriding rules.
 
-**Avoid Important**: The default styles don't use `!important`, so you shouldn't need it either.
+**Avoid Important**: The default styles do not use `!important`, so it should not be necessary.
 
-**Respect User Preferences**: The default styles include support for `prefers-reduced-motion`. Maintain this accessibility feature in your customizations.
+**Respect User Preferences**: The default styles include support for `prefers-reduced-motion`. Maintain this accessibility feature in customizations.
 
-**Z-Index Management**: If you have other overlays (modals, tooltips), ensure `--drawerly-z-index` fits your layering system.
+**Z-Index Management**: When other overlays exist (modals, tooltips), ensure `--drawerly-z-index` fits the layering system.
 
 ```css
 /* Example z-index hierarchy */

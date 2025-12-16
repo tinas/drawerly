@@ -1,6 +1,6 @@
 # Introduction
 
-`@drawerly/core` provides a drawer stack manager with zero UI dependencies. It handles drawer state, stacking order, and lifecycle events. Framework adapters consume this package to provide UI components.
+`@drawerly/core` provides a drawer stack manager with zero UI dependencies. This package manages drawer state, stacking order, and lifecycle events. Framework adapters consume this package to provide UI components.
 
 ## Key Features
 
