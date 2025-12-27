@@ -13,7 +13,9 @@ For full documentation, visit **[drawerly.dev](https://drawerly.dev)**
 
 - **[@drawerly/core](./packages/drawerly-core)** - Framework-agnostic core engine
 - **[@drawerly/vue](./packages/drawerly-vue)** - Vue 3 adapter
+- **[@drawerly/react](./packages/drawerly-react)** - React 18 adapter
 
 ## License
+
 
 MIT
