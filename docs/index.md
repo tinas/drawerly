@@ -13,6 +13,9 @@ hero:
       text: Get Started
       link: /guide/overview
     - theme: alt
+      text: React Guide
+      link: /react/getting-started
+    - theme: alt
       text: Vue Guide
       link: /vue/getting-started
 

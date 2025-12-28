@@ -12,6 +12,7 @@ const GUIDES = [
 ]
 
 const PACKAGES = [
+  { text: 'React', link: '/react/introduction', activeMatch: '^/react/' },
   { text: 'Vue', link: '/vue/introduction', activeMatch: '^/vue/' },
   { text: 'Core', link: '/core/introduction', activeMatch: '^/core/' },
 ]
@@ -48,6 +49,20 @@ const CORE_PACKAGE_CONCEPTS = [
 
 const CORE_PACKAGE_API = [
   { text: 'API Reference', link: '/core/api/' },
+]
+
+const REACT_PACKAGE_GUIDE = [
+  { text: 'Introduction', link: '/react/introduction' },
+  { text: 'Getting Started', link: '/react/getting-started' },
+]
+
+const REACT_PACKAGE_HOOKS = [
+  { text: 'useDrawer', link: '/react/hooks/use-drawer' },
+]
+
+const REACT_PACKAGE_API = [
+  { text: 'DrawerlyContainer', link: '/react/api/drawerly-container' },
+  { text: 'drawer', link: '/react/api/drawer' },
 ]
 
 export default defineConfig({
@@ -100,7 +115,7 @@ export default defineConfig({
       {
         text: 'Packages',
         items: PACKAGES,
-        activeMatch: '^/(vue|core)/',
+        activeMatch: '^/(react|vue|core)/',
       },
     ],
 
@@ -141,6 +156,20 @@ export default defineConfig({
         {
           text: 'API',
           items: CORE_PACKAGE_API,
+        },
+      ],
+      '/react/': [
+        {
+          text: 'React Package',
+          items: REACT_PACKAGE_GUIDE,
+        },
+        {
+          text: 'Hooks',
+          items: REACT_PACKAGE_HOOKS,
+        },
+        {
+          text: 'API',
+          items: REACT_PACKAGE_API,
         },
       ],
     },
