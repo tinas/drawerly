@@ -1,8 +1,12 @@
 # DrawerlyContainer API Reference
 
-Component that renders and animates the active drawer stack. It is registered globally when the instance created by `createDrawerly()` is installed, and can also be imported directly. One container per application is enough, placed in your root component:
+Component that renders and animates the active drawer stack. Import it and place one instance per application in your root component:
 
 ```vue
+<script setup lang="ts">
+import { DrawerlyContainer } from '@drawerly/vue'
+</script>
+
 <template>
   <div id="app">
     <YourAppContent />

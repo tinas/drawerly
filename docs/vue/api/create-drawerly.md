@@ -1,6 +1,6 @@
 # createDrawerly API Reference
 
-Factory that creates a `Drawerly` instance to be installed with `app.use()`. Installing it provides the instance to the component tree, exposes it as `$drawerly`, and registers the `DrawerlyContainer` component globally.
+Factory that creates a `Drawerly` instance to be installed with `app.use()`. Installing it provides the instance to the component tree so [`useDrawerly()`](./use-drawerly.md) and [`useDrawer()`](./use-drawer.md) can resolve it.
 
 ```ts
 import { createDrawerly } from '@drawerly/vue'
@@ -96,9 +96,13 @@ router.beforeEach(() => {
 
 ## What Installing Provides
 
-Components access the instance with [`useDrawerly()`](./use-drawerly.md), or as `this.$drawerly` in the Options API. `DrawerlyContainer` is registered as a global component, so it needs no import:
+Installing calls `app.provide(drawerlyInjectionKey, drawerly)` so that [`useDrawerly()`](./use-drawerly.md) and [`useDrawer()`](./use-drawer.md) resolve the instance from any component in the tree. Render the stack by importing `DrawerlyContainer` and placing it once in your app root:
 
-```vue
+```vue [App.vue]
+<script setup lang="ts">
+import { DrawerlyContainer } from '@drawerly/vue'
+</script>
+
 <template>
   <div id="app">
     <YourAppContent />
@@ -107,19 +111,17 @@ Components access the instance with [`useDrawerly()`](./use-drawerly.md), or as 
 </template>
 ```
 
-Type augmentations for `$drawerly` and the global component are included in the package.
-
 Components passed through `open`, `updateOptions`, or `updateDefaultOptions` are automatically wrapped with `markRaw()`, so Vue does not make them reactive.
 
 ## Multiple Instances
 
-One instance per application is the intended setup. Installing a second instance into the same app replaces the first for injection and logs a warning.
+One instance per application is the intended setup. Installing a second instance into the same app replaces the first for injection, because the second `app.provide()` call overrides the first.
 
 For an independent drawer stack in part of the component tree, create an instance without installing it and provide it to the subtree with the exported injection key. The `<DrawerlyContainer>` and all `useDrawerly()` / `useDrawer()` calls inside that subtree bind to the scoped instance:
 
 ```vue [EditorPane.vue]
 <script setup lang="ts">
-import { createDrawerly, drawerlyInjectionKey } from '@drawerly/vue'
+import { createDrawerly, DrawerlyContainer, drawerlyInjectionKey } from '@drawerly/vue'
 import { provide } from 'vue'
 
 const editorDrawers = createDrawerly()

@@ -6,4 +6,4 @@ import type { Drawerly } from './drawerly'
  *
  * @public
  */
-export const drawerlyInjectionKey: InjectionKey<Drawerly> = Symbol('drawerly')
+export const drawerlyInjectionKey: InjectionKey<Drawerly<any>> = Symbol('drawerly')

@@ -73,28 +73,26 @@ describe('createDrawerly', () => {
     expect(drawerly.getDrawerInstance('a')?.component).toBe(replacement)
   })
 
-  it('warns and replaces the instance when a second one is installed in the same app', () => {
+  it('replaces the injected instance when a second one is installed in the same app', () => {
     const first = createDrawerly()
     const second = createDrawerly()
-    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
 
-    const Probe = defineComponent({ render: () => h('div') })
-    const wrapper = mount(Probe, {
+    let injected: ReturnType<typeof useDrawerly> | undefined
+    const Probe = defineComponent({
+      setup() {
+        injected = useDrawerly()
+        return () => h('div')
+      },
+    })
+
+    mount(Probe, {
       global: { plugins: [first, second] },
     })
 
-    expect(warn).toHaveBeenCalledWith(
-      expect.stringContaining('already installed'),
-    )
-    expect(wrapper.vm.$drawerly).toBe(second)
-
-    const warnings = warn.mock.calls.flat().join('\n')
-    expect(warnings).not.toContain('already been registered')
-
-    warn.mockRestore()
+    expect(injected).toBe(second)
   })
 
-  it('provides the instance and registers globals on install', () => {
+  it('provides the instance on install', () => {
     const drawerly = createDrawerly()
 
     const Probe = defineComponent({
@@ -105,13 +103,8 @@ describe('createDrawerly', () => {
       },
     })
 
-    const wrapper = mount(Probe, {
+    mount(Probe, {
       global: { plugins: [drawerly] },
     })
-
-    expect(wrapper.vm.$drawerly).toBe(drawerly)
-    expect(
-      wrapper.vm.$.appContext.components.DrawerlyContainer,
-    ).toBeDefined()
   })
 })

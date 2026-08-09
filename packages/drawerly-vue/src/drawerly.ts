@@ -8,7 +8,6 @@ import type { VueDrawerOptions } from './types'
 
 import { createDrawerManager } from '@drawerly/core'
 import { markRaw, shallowRef } from 'vue'
-import { DrawerlyContainer } from './drawer-container'
 import { drawerlyInjectionKey } from './injection'
 
 /**
@@ -43,10 +42,6 @@ export interface Drawerly<
    */
   install: (app: App) => void
 }
-
-// Written as a literal expression so bundlers can fold it away.
-// eslint-disable-next-line node/prefer-global/process
-const isDev = process.env.NODE_ENV !== 'production'
 
 // Vue warns when a component definition ends up behind a reactive proxy.
 function markComponentRaw(options: unknown): void {
@@ -104,35 +99,9 @@ export function createDrawerly<
     },
 
     install: (app) => {
-      if (isDev && app.config.globalProperties.$drawerly) {
-        console.warn(
-          '[@drawerly/vue] Another Drawerly instance is already installed in this app and will be replaced. For an independent drawer stack, provide `drawerlyInjectionKey` in a subtree instead of installing a second instance.',
-        )
-      }
-
       app.provide(drawerlyInjectionKey, drawerly)
-      app.config.globalProperties.$drawerly = drawerly
-
-      if (!app.component('DrawerlyContainer'))
-        app.component('DrawerlyContainer', DrawerlyContainer)
     },
   }
 
   return drawerly
-}
-
-declare module 'vue' {
-  interface ComponentCustomProperties {
-    /**
-     * Drawerly instance registered by {@link createDrawerly}.
-     */
-    $drawerly: Drawerly
-  }
-
-  interface GlobalComponents {
-    /**
-     * Container that renders the active drawer stack.
-     */
-    DrawerlyContainer: typeof DrawerlyContainer
-  }
 }

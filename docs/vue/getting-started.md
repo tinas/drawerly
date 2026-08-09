@@ -40,9 +40,13 @@ app.mount('#app')
 
 `defaultOptions` sets global defaults for all drawers, such as `placement` or the close behaviors. See the [createDrawerly API Reference](./api/create-drawerly.md) for the full list.
 
-Then add `<DrawerlyContainer />` to your root template. It renders the open drawers and is registered globally, so no import is needed:
+Then add `<DrawerlyContainer />` to your root template. It renders the open drawers:
 
 ```vue [App.vue]
+<script setup lang="ts">
+import { DrawerlyContainer } from '@drawerly/vue'
+</script>
+
 <template>
   <div id="app">
     <YourAppContent />
@@ -145,8 +149,6 @@ router.afterEach(() => {
   drawerly.closeAll()
 })
 ```
-
-In Options API components it is available as `this.$drawerly`.
 
 ## Next Steps
 
