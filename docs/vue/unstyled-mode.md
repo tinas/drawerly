@@ -100,8 +100,7 @@ For complete control over markup and behavior, skip `<DrawerlyContainer>` entire
 
 ```vue [CustomDrawerContainer.vue]
 <script setup lang="ts">
-import { resolveDrawerPredicate } from '@drawerly/core'
-import { useDrawerly } from '@drawerly/vue'
+import { useDrawerly, resolveDrawerPredicate } from '@drawerly/vue'
 import { computed, onMounted, onUnmounted } from 'vue'
 
 const drawerly = useDrawerly()

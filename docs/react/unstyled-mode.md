@@ -95,8 +95,7 @@ Escape handling remains active and still honors each drawer's `closeOnEscapeKey`
 For complete control over markup and behavior, skip `<DrawerlyContainer>` entirely and render the stack yourself. `useDrawerly` exposes the reactive stack, so a custom container is ordinary React code:
 
 ```tsx [CustomDrawerContainer.tsx]
-import { resolveDrawerPredicate } from '@drawerly/core'
-import { useDrawerly } from '@drawerly/react'
+import { resolveDrawerPredicate, useDrawerly } from '@drawerly/react'
 import { useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { drawerly } from './drawerly'

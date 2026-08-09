@@ -12,13 +12,4 @@ export { useDrawer } from './use-drawer'
 export type { UseDrawerlyResult } from './use-drawerly'
 export { useDrawerly } from './use-drawerly'
 
-export type {
-  DrawerDefaultOptions,
-  DrawerInstance,
-  DrawerKey,
-  DrawerOptionsWithoutKey,
-  DrawerPatch,
-  DrawerPlacement,
-  DrawerPredicate,
-  DrawerState,
-} from '@drawerly/core'
+export * from '@drawerly/core'
