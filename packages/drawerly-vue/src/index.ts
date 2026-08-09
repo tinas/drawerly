@@ -1,17 +1,24 @@
 export { DrawerlyContainer } from './drawer-container'
 
-export type { DrawerPluginOptions } from './plugin'
-export { DrawerPlugin } from './plugin'
+export type { Drawerly, DrawerlyOptions } from './drawerly'
+export { createDrawerly } from './drawerly'
 
-export type { UseDrawerContextResult } from './use-drawer-context'
-export { useDrawerContext } from './use-drawer-context'
+export { drawerlyInjectionKey } from './injection'
 
-export type { UseDrawerInstanceResult } from './use-drawer-instance'
-export { useDrawerInstance } from './use-drawer-instance'
+export type { DrawerContentProps, VueDrawerOptions } from './types'
 
-export type { VueDrawerOptions } from './utils'
+export type { UseDrawerResult } from './use-drawer'
+export { useDrawer } from './use-drawer'
+
+export { useDrawerly } from './use-drawerly'
 
 export type {
+  DrawerDefaultOptions,
+  DrawerInstance,
   DrawerKey,
+  DrawerOptionsWithoutKey,
+  DrawerPatch,
   DrawerPlacement,
+  DrawerPredicate,
+  DrawerState,
 } from '@drawerly/core'

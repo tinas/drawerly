@@ -1,345 +1,396 @@
-import type { DrawerState } from '@drawerly/core'
-import type { VueDrawerOptions } from '../src/utils'
-
-import { mount } from '@vue/test-utils'
+import { enableAutoUnmount, mount } from '@vue/test-utils'
+import { defineComponent, h, nextTick, provide } from 'vue'
 import { DrawerlyContainer } from '../src/drawer-container'
-import { DrawerSymbol } from '../src/utils'
+import { createDrawerly } from '../src/drawerly'
+import { drawerlyInjectionKey } from '../src/injection'
+import { useDrawer } from '../src/use-drawer'
 
-type Listener = (state: DrawerState<VueDrawerOptions>) => void
+enableAutoUnmount(afterEach)
 
-interface MockManager {
-  getState: () => DrawerState<VueDrawerOptions>
-  subscribe: (listener: Listener) => () => void
-  close: (key: string) => void
-  bringToTop: (key: string) => void
-  closeAll: () => void
-  updateDefaultOptions: (...args: any[]) => void
-  updateOptions: (...args: any[]) => void
+// TransitionGroup finishes enter and leave across animation frames.
+async function flushTransition(): Promise<void> {
+  await nextTick()
+  await new Promise<void>(resolve => requestAnimationFrame(() => resolve()))
+  await new Promise<void>(resolve => requestAnimationFrame(() => resolve()))
+  await nextTick()
 }
 
-/**
- * Helper to create a mock manager with a mutable state and listeners.
- */
-function createMockManager(initialStack: VueDrawerOptions[] = []) {
-  let state: DrawerState<VueDrawerOptions> = { stack: initialStack }
-  const listeners: Listener[] = []
+const ContentProbe = defineComponent({
+  props: {
+    drawerKey: { type: String, required: true },
+    label: { type: String, default: '' },
+  },
+  setup(props) {
+    const { close } = useDrawer(props.drawerKey)
 
-  const manager: MockManager = {
-    getState: () => state,
-    subscribe: (listener: Listener) => {
-      listeners.push(listener)
-      return () => {
-        const idx = listeners.indexOf(listener)
-        if (idx !== -1)
-          listeners.splice(idx, 1)
-      }
-    },
-    close: vi.fn(),
-    bringToTop: vi.fn(),
-    closeAll: vi.fn(),
-    updateDefaultOptions: vi.fn(),
-    updateOptions: vi.fn(),
-  }
-
-  const setStack = (nextStack: VueDrawerOptions[]) => {
-    const nextState: DrawerState<VueDrawerOptions> = { stack: nextStack }
-    state = nextState
-    listeners.forEach(l => l(nextState))
-  }
-
-  return { manager, setStack }
-}
-
-// Polyfill AnimationEvent for Node/jsdom if needed
-beforeAll(() => {
-  if (typeof AnimationEvent === 'undefined') {
-    class AnimationEventStub extends Event {
-      animationName: string
-
-      constructor(type: string, init?: { animationName?: string }) {
-        super(type)
-        this.animationName = init?.animationName ?? ''
-      }
-    }
-
-    // @ts-expect-error: assign to global for test env
-    globalThis.AnimationEvent = AnimationEventStub
-  }
+    return () =>
+      h(
+        'button',
+        {
+          'data-testid': `content-${props.drawerKey}`,
+          'onClick': close,
+        },
+        props.label,
+      )
+  },
 })
 
+function mountContainer(
+  drawerly = createDrawerly(),
+  props: Record<string, unknown> = {},
+) {
+  const wrapper = mount(DrawerlyContainer, {
+    props,
+    global: {
+      plugins: [drawerly],
+      // Real TransitionGroup is required to exercise enter/leave hooks.
+      stubs: { 'transition-group': false },
+    },
+  })
+
+  return { drawerly, wrapper }
+}
+
+function queryOverlays(): HTMLElement[] {
+  return [...document.querySelectorAll<HTMLElement>('[data-drawerly-overlay]')]
+}
+
 describe('drawerlyContainer', () => {
-  let addListenerSpy: ReturnType<typeof vi.spyOn>
-  let removeListenerSpy: ReturnType<typeof vi.spyOn>
-
-  beforeEach(() => {
-    addListenerSpy = vi.spyOn(document, 'addEventListener')
-    removeListenerSpy = vi.spyOn(document, 'removeEventListener')
-  })
-
   afterEach(() => {
-    addListenerSpy.mockRestore()
-    removeListenerSpy.mockRestore()
     document.body.innerHTML = ''
+    document.body.removeAttribute('style')
   })
 
-  it('throws if used without a provided DrawerManager', () => {
-    expect(() => {
-      mount(DrawerlyContainer, {
-        props: { headless: false },
-      })
-    }).toThrowError(
-      '[@drawerly/vue] DrawerlyContainer must be used within DrawerPlugin',
+  it('throws when mounted without an installed drawerly instance', () => {
+    expect(() => mount(DrawerlyContainer)).toThrowError(
+      /must be used after installing/,
     )
   })
 
-  it('renders the stack, filters data-* attributes, and respects placement', () => {
-    const { manager } = createMockManager([
-      {
-        drawerKey: 'd1',
-        placement: 'left',
-        ariaLabel: 'First drawer',
-        dataAttributes: {
-          'data-foo': 'bar',
-          'data-drawerly-internal': 'should-be-filtered',
-        },
-      } as VueDrawerOptions,
-    ])
+  it('renders the stack teleported to body with contract attributes', async () => {
+    const { drawerly } = mountContainer()
 
-    const wrapper = mount(DrawerlyContainer, {
-      props: {
-        headless: false,
-        teleportTo: 'body',
-      },
-      global: {
-        provide: {
-          [DrawerSymbol as symbol]: manager,
-        },
-      },
-    })
+    drawerly.open({ drawerKey: 'a', placement: 'left' })
+    drawerly.open({ drawerKey: 'b' })
+    await nextTick()
 
-    const overlays = document.querySelectorAll('[data-drawerly-overlay]')
-    expect(overlays.length).toBe(1)
+    const overlays = queryOverlays()
+    expect(overlays).toHaveLength(2)
 
-    const overlay = overlays[0] as HTMLElement
-    expect(overlay.getAttribute('data-drawerly-key')).toBe('d1')
-    expect(overlay.getAttribute('data-drawerly-placement')).toBe('left')
+    const root = document.querySelector('[data-drawerly-root]')
+    expect(root).not.toBeNull()
 
-    // Keeps user data-* but drops internal data-drawerly-* keys
-    expect(overlay.getAttribute('data-foo')).toBe('bar')
-    expect(overlay.hasAttribute('data-drawerly-internal')).toBe(false)
+    expect(overlays[0]?.getAttribute('data-drawerly-key')).toBe('a')
+    expect(overlays[0]?.getAttribute('data-drawerly-placement')).toBe('left')
+    expect(overlays[0]?.hasAttribute('data-top')).toBe(false)
 
-    const backdrop = overlay.querySelector('[data-drawerly-backdrop]')
-    expect(backdrop).not.toBeNull()
-
-    wrapper.unmount()
+    expect(overlays[1]?.getAttribute('data-drawerly-key')).toBe('b')
+    expect(overlays[1]?.getAttribute('data-drawerly-index')).toBe('1')
+    expect(overlays[1]?.getAttribute('data-drawerly-count')).toBe('2')
+    expect(overlays[1]?.hasAttribute('data-top')).toBe(true)
   })
 
-  it('backdrop click respects closeOnBackdropClick predicates and emits events', () => {
-    const close = vi.fn()
-    const { manager } = createMockManager([
-      {
-        drawerKey: 'd1',
-        placement: 'right',
-        closeOnBackdropClick: true,
-      } as VueDrawerOptions,
-    ])
+  it('renders drawer components with the drawer key and closes through useDrawer', async () => {
+    const { drawerly } = mountContainer()
 
-    manager.close = close
+    drawerly.open({
+      drawerKey: 'a',
+      component: ContentProbe,
+      componentProps: { label: 'Hello' },
+    })
+    await nextTick()
 
-    const wrapper = mount(DrawerlyContainer, {
+    const content = document.querySelector<HTMLElement>(
+      '[data-testid="content-a"]',
+    )
+    expect(content?.textContent).toBe('Hello')
+
+    content?.click()
+    await flushTransition()
+
+    expect(drawerly.isOpen('a')).toBe(false)
+    expect(queryOverlays()).toHaveLength(0)
+  })
+
+  it('does not re-render existing drawer content when the stack changes', async () => {
+    const renders: string[] = []
+
+    const CountingContent = defineComponent({
       props: {
-        headless: false,
-        teleportTo: 'body',
+        drawerKey: { type: String, required: true },
+        label: { type: String, default: '' },
       },
-      global: {
-        provide: {
-          [DrawerSymbol as symbol]: manager,
-        },
+      setup(props) {
+        return () => {
+          renders.push(props.drawerKey)
+          return h('span', props.label || props.drawerKey)
+        }
       },
     })
 
-    const backdrop = document.querySelector(
+    const { drawerly } = mountContainer()
+
+    drawerly.open({ drawerKey: 'a', component: CountingContent })
+    drawerly.open({ drawerKey: 'b', component: CountingContent })
+    drawerly.open({ drawerKey: 'c', component: CountingContent })
+    await nextTick()
+
+    renders.length = 0
+
+    drawerly.open({ drawerKey: 'd', component: CountingContent })
+    await nextTick()
+    drawerly.bringToTop('a')
+    await nextTick()
+
+    expect(renders).toEqual(['d'])
+
+    drawerly.updateOptions('a', { componentProps: { label: 'second' } })
+    await nextTick()
+
+    expect(renders).toEqual(['d', 'a'])
+    expect(document.body.textContent).toContain('second')
+  })
+
+  it('renders the default slot with the drawer and a close handler', async () => {
+    const drawerly = createDrawerly()
+
+    mount(DrawerlyContainer, {
+      global: {
+        plugins: [drawerly],
+        stubs: { 'transition-group': false },
+      },
+      slots: {
+        default: ({ drawer, close }: any) =>
+          h(
+            'button',
+            { 'data-testid': 'slotted', 'onClick': close },
+            drawer.drawerKey,
+          ),
+      },
+    })
+
+    drawerly.open({ drawerKey: 'a' })
+    await nextTick()
+
+    const slotted = document.querySelector<HTMLElement>('[data-testid="slotted"]')
+    expect(slotted?.textContent).toBe('a')
+
+    slotted?.click()
+    await flushTransition()
+
+    expect(drawerly.isOpen('a')).toBe(false)
+  })
+
+  it('closes the drawer on backdrop click unless disabled', async () => {
+    const { drawerly } = mountContainer()
+
+    drawerly.open({ drawerKey: 'a', closeOnBackdropClick: false })
+    await nextTick()
+
+    const backdrop = document.querySelector<HTMLElement>(
       '[data-drawerly-backdrop]',
-    ) as HTMLElement
-    expect(backdrop).not.toBeNull()
-
-    backdrop.click()
-
-    const panel = document.querySelector(
-      '[data-drawerly-panel]',
-    ) as HTMLElement
-    expect(panel).not.toBeNull()
-
-    const animationEvent = new AnimationEvent('animationend', {
-      animationName: 'drawerly-slide-out-right',
-    })
-    panel.dispatchEvent(animationEvent)
-
-    expect(close).toHaveBeenCalledWith('d1')
-
-    // Should emit drawer-closed with mode single
-    const closedEmits = wrapper.emitted('drawer-closed') ?? []
-    expect(closedEmits.length).toBeGreaterThan(0)
-    const lastClosed = closedEmits[closedEmits.length - 1]?.[0] as {
-      key: string
-      mode: 'single' | 'bulk'
-    }
-
-    expect(lastClosed).toEqual({ key: 'd1', mode: 'single' })
-
-    wrapper.unmount()
-  })
-
-  it('closes top drawer on Escape when allowed and emits drawer-closed', () => {
-    const close = vi.fn()
-    const { manager } = createMockManager([
-      {
-        drawerKey: 'd1',
-        placement: 'right',
-        closeOnEscapeKey: true,
-      } as VueDrawerOptions,
-    ])
-    manager.close = close
-
-    const wrapper = mount(DrawerlyContainer, {
-      props: {
-        headless: false,
-        teleportTo: 'body',
-      },
-      global: {
-        provide: {
-          [DrawerSymbol as symbol]: manager,
-        },
-      },
-    })
-
-    expect(addListenerSpy).toHaveBeenCalledWith(
-      'keydown',
-      expect.any(Function),
     )
+    backdrop?.click()
+    await nextTick()
+    expect(drawerly.isOpen('a')).toBe(true)
 
-    const keyEvent = new KeyboardEvent('keydown', { key: 'Escape' })
-    document.dispatchEvent(keyEvent)
+    drawerly.updateOptions('a', { closeOnBackdropClick: true })
+    await nextTick()
 
-    const panel = document.querySelector(
-      '[data-drawerly-panel]',
-    ) as HTMLElement
-    const animationEvent = new AnimationEvent('animationend', {
-      animationName: 'drawerly-slide-out-right',
-    })
-    panel.dispatchEvent(animationEvent)
-
-    expect(close).toHaveBeenCalledWith('d1')
-
-    const closedEmits = wrapper.emitted('drawer-closed') ?? []
-    expect(closedEmits.length).toBeGreaterThan(0)
-    const lastClosed = closedEmits[closedEmits.length - 1]?.[0] as {
-      key: string
-      mode: 'single' | 'bulk'
-    }
-
-    expect(lastClosed).toEqual({ key: 'd1', mode: 'single' })
-
-    wrapper.unmount()
+    backdrop?.click()
+    await nextTick()
+    expect(drawerly.isOpen('a')).toBe(false)
   })
 
-  it('does not attach keydown listener or render backdrop in headless mode', () => {
-    const { manager } = createMockManager([
-      {
-        drawerKey: 'd1',
-        placement: 'right',
-      } as VueDrawerOptions,
+  it('closes the top drawer on Escape honoring its predicate', async () => {
+    const { drawerly } = mountContainer()
+
+    drawerly.open({ drawerKey: 'a' })
+    drawerly.open({ drawerKey: 'b', closeOnEscapeKey: false })
+    await nextTick()
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
+    await nextTick()
+
+    // top drawer refuses to close
+    expect(drawerly.isOpen('b')).toBe(true)
+
+    drawerly.updateOptions('b', { closeOnEscapeKey: true })
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
+    await nextTick()
+
+    expect(drawerly.isOpen('b')).toBe(false)
+    expect(drawerly.isOpen('a')).toBe(true)
+  })
+
+  it('plays the exit animation for drawers closed through the manager API', async () => {
+    const { drawerly } = mountContainer()
+
+    drawerly.open({ drawerKey: 'a' })
+    drawerly.open({ drawerKey: 'b' })
+    await nextTick()
+
+    drawerly.closeAll()
+    await nextTick()
+
+    // still on screen while leaving
+    expect(queryOverlays()).toHaveLength(2)
+
+    await flushTransition()
+    expect(queryOverlays()).toHaveLength(0)
+  })
+
+  it('emits drawer-opened, drawer-closed and all-closed once their animations finish', async () => {
+    const { drawerly, wrapper } = mountContainer()
+
+    drawerly.open({ drawerKey: 'a' })
+    drawerly.open({ drawerKey: 'b' })
+    await flushTransition()
+
+    expect(wrapper.emitted('drawer-opened')).toEqual([
+      [{ key: 'a' }],
+      [{ key: 'b' }],
     ])
 
-    const wrapper = mount(DrawerlyContainer, {
-      props: {
-        headless: true,
-        teleportTo: 'body',
-      },
-      global: {
-        provide: {
-          [DrawerSymbol as symbol]: manager,
-        },
+    drawerly.close('b')
+    await flushTransition()
+
+    expect(wrapper.emitted('drawer-closed')).toEqual([[{ key: 'b' }]])
+    expect(wrapper.emitted('all-closed')).toBeUndefined()
+
+    drawerly.closeAll()
+    await flushTransition()
+
+    expect(wrapper.emitted('drawer-closed')).toHaveLength(2)
+    expect(wrapper.emitted('all-closed')).toHaveLength(1)
+  })
+
+  it('locks body scroll until the exit animation finishes', async () => {
+    const { drawerly } = mountContainer()
+
+    drawerly.open({ drawerKey: 'a' })
+    await nextTick()
+    expect(document.body.style.overflow).toBe('hidden')
+
+    drawerly.close('a')
+    await nextTick()
+
+    // the drawer is still visible, so the page must stay locked
+    expect(queryOverlays()).toHaveLength(1)
+    expect(document.body.style.overflow).toBe('hidden')
+
+    await flushTransition()
+    expect(document.body.style.overflow).toBe('')
+  })
+
+  it('does not lock scroll when lockScroll is false', async () => {
+    const { drawerly } = mountContainer(createDrawerly(), { lockScroll: false })
+
+    drawerly.open({ drawerKey: 'a' })
+    await nextTick()
+
+    expect(document.body.style.overflow).toBe('')
+  })
+
+  it('does not lock scroll in non-modal mode', async () => {
+    const { drawerly } = mountContainer(createDrawerly(), { modal: false })
+
+    drawerly.open({ drawerKey: 'a' })
+    await nextTick()
+
+    expect(document.body.style.overflow).toBe('')
+  })
+
+  it('non-modal mode renders no backdrop or aria-modal but keeps Escape handling', async () => {
+    const { drawerly } = mountContainer(createDrawerly(), { modal: false })
+
+    drawerly.open({ drawerKey: 'a' })
+    drawerly.open({ drawerKey: 'b' })
+    await nextTick()
+
+    expect(document.querySelector('[data-drawerly-backdrop]')).toBeNull()
+
+    const panel = document.querySelector('[data-drawerly-panel]')
+    expect(panel?.getAttribute('role')).toBe('dialog')
+    expect(panel?.hasAttribute('aria-modal')).toBe(false)
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
+    await nextTick()
+    expect(drawerly.isOpen('b')).toBe(false)
+  })
+
+  it('applies dialog semantics in modal mode', async () => {
+    const { drawerly } = mountContainer()
+
+    drawerly.open({ drawerKey: 'a', ariaLabel: 'Custom' })
+    await nextTick()
+
+    const panel = document.querySelector('[data-drawerly-panel]')
+    expect(panel?.getAttribute('role')).toBe('dialog')
+    expect(panel?.getAttribute('aria-modal')).toBe('true')
+    expect(panel?.getAttribute('aria-label')).toBe('Custom')
+    expect(panel?.getAttribute('tabindex')).toBe('-1')
+  })
+
+  it('forwards user data attributes but protects the drawerly contract', async () => {
+    const { drawerly } = mountContainer()
+
+    drawerly.open({
+      drawerKey: 'a',
+      dataAttributes: {
+        'data-analytics': 'settings',
+        'data-drawerly-key': 'hijacked',
       },
     })
+    await nextTick()
+
+    const overlay = queryOverlays()[0]
+    expect(overlay?.getAttribute('data-analytics')).toBe('settings')
+    expect(overlay?.getAttribute('data-drawerly-key')).toBe('a')
+  })
+
+  it('binds to the nearest provided instance for scoped stacks', async () => {
+    const appInstance = createDrawerly()
+    const scoped = createDrawerly()
+
+    const Host = defineComponent({
+      setup() {
+        provide(drawerlyInjectionKey, scoped)
+        return () => h(DrawerlyContainer)
+      },
+    })
+
+    mount(Host, {
+      global: {
+        plugins: [appInstance],
+        stubs: { 'transition-group': false },
+      },
+    })
+
+    scoped.open({ drawerKey: 'scoped-drawer' })
+    appInstance.open({ drawerKey: 'app-drawer' })
+    await nextTick()
 
     expect(
-      addListenerSpy.mock.calls.some((call: unknown[]) => call[0] === 'keydown'),
-    ).toBe(false)
-
-    const backdrop = document.querySelector('[data-drawerly-backdrop]')
-    expect(backdrop).toBeNull()
-
-    wrapper.unmount()
+      document.querySelector('[data-drawerly-key="scoped-drawer"]'),
+    ).not.toBeNull()
+    expect(
+      document.querySelector('[data-drawerly-key="app-drawer"]'),
+    ).toBeNull()
   })
 
-  it('animates closeAll and emits bulk events', async () => {
-    const d1: VueDrawerOptions = { drawerKey: 'd1', placement: 'right' }
-    const d2: VueDrawerOptions = { drawerKey: 'd2', placement: 'right' }
+  it('teleports to a custom target', async () => {
+    const target = document.createElement('div')
+    target.id = 'custom-target'
+    document.body.appendChild(target)
 
-    const { manager, setStack } = createMockManager([d1, d2])
-
-    const wrapper = mount(DrawerlyContainer, {
-      props: {
-        headless: false,
-        teleportTo: 'body',
-      },
-      global: {
-        provide: {
-          [DrawerSymbol as symbol]: manager,
-        },
-      },
+    const { drawerly } = mountContainer(createDrawerly(), {
+      teleportTo: '#custom-target',
     })
 
-    let overlays = document.querySelectorAll('[data-drawerly-overlay]')
-    expect(overlays.length).toBe(2)
+    drawerly.open({ drawerKey: 'a' })
+    await nextTick()
 
-    // Simulate closeAll: state goes from non-empty to empty
-    setStack([])
-    await wrapper.vm.$nextTick()
-
-    overlays = document.querySelectorAll('[data-drawerly-overlay]')
-    expect(overlays.length).toBe(2)
-    overlays.forEach((overlay) => {
-      expect(overlay.hasAttribute('data-closing')).toBe(true)
-    })
-
-    // Should emit start event with both keys
-    const startEmits
-      = (wrapper.emitted('drawer-close-all-start') ?? [])[0]?.[0] as
-      | { keys: string[] }
-      | undefined
-    expect(startEmits).toBeDefined()
-    expect(startEmits?.keys.sort()).toEqual(['d1', 'd2'])
-
-    const panels = document.querySelectorAll('[data-drawerly-panel]')
-    panels.forEach((panel) => {
-      const ev = new AnimationEvent('animationend', {
-        animationName: 'drawerly-slide-out-right',
-      })
-      panel.dispatchEvent(ev)
-    })
-
-    await wrapper.vm.$nextTick()
-
-    overlays = document.querySelectorAll('[data-drawerly-overlay]')
-    expect(overlays.length).toBe(0)
-
-    // Should emit drawer-closed twice with mode "bulk"
-    const closedEmits = wrapper.emitted('drawer-closed') ?? []
-    const bulkPayloads = closedEmits.map(e => e[0]) as {
-      key: string
-      mode: 'single' | 'bulk'
-    }[]
-
-    expect(bulkPayloads.filter(p => p.mode === 'bulk').length).toBe(2)
-    const keys = bulkPayloads.map(p => p.key).sort()
-    expect(keys).toEqual(['d1', 'd2'])
-
-    // And a final complete event
-    const completeEmits = wrapper.emitted('drawer-close-all-complete') ?? []
-    expect(completeEmits.length).toBe(1)
-
-    wrapper.unmount()
+    expect(target.querySelector('[data-drawerly-overlay]')).not.toBeNull()
   })
 })

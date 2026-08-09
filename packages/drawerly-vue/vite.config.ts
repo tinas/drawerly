@@ -47,18 +47,11 @@ export default defineConfig({
   build: {
     lib: {
       entry: path.resolve(__dirname, 'src/index.ts'),
-      name: 'DrawerlyVue',
-      fileName: format => (format === 'es' ? 'index.mjs' : 'index.cjs'),
-      formats: ['es', 'cjs'],
+      fileName: () => 'index.mjs',
+      formats: ['es'],
     },
     rollupOptions: {
-      external: ['vue', '@drawerly/core'],
-      output: {
-        exports: 'named',
-        globals: {
-          vue: 'Vue',
-        },
-      },
+      external: ['vue', /^@drawerly\/core/],
     },
     emptyOutDir: true,
     sourcemap: true,

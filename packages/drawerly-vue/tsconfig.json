@@ -3,6 +3,6 @@
   "compilerOptions": {
     "types": ["vitest/globals"]
   },
-  "include": ["src", "tests", "vite.config.ts"],
+  "include": ["env.d.ts", "src", "tests", "vite.config.ts"],
   "exclude": ["dist", "node_modules"]
 }
