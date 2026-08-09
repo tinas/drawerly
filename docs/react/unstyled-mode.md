@@ -52,7 +52,7 @@ Everything else keeps working: Escape and backdrop-click closing and scroll lock
 /* left, top, and bottom placements follow the same pattern */
 ```
 
-The full attribute list is in the [DrawerlyContainer API Reference](./api/drawer-container.md#data-attributes).
+The full attribute list is in the [core styling reference](/core/concepts/styling#data-attributes).
 
 ## Custom Animations
 
@@ -88,7 +88,7 @@ By default drawers are modal: a backdrop and `aria-modal` semantics. Set `modal`
 <DrawerlyContainer drawerly={drawerly} modal={false} />
 ```
 
-Escape handling remains active and still honors each drawer's `closeOnEscapeKey` option. Scroll locking is a separate `lockScroll` prop and can be turned off independently of `modal`. See the [`modal`](./api/drawer-container.md#modal) and [`lockScroll`](./api/drawer-container.md#lockscroll) props for details.
+Escape handling remains active and still honors each drawer's `closeOnEscapeKey` option. Scroll locking is a separate `lockScroll` prop and can be turned off independently of `modal`.
 
 ## Building a Custom Container
 
@@ -152,7 +152,7 @@ export function CustomDrawerContainer() {
 Drawer content closes itself the same way it would inside the built-in container, with `useDrawer(drawerly, props.drawerKey).close()`.
 
 ::: warning Accessibility is your responsibility
-The built-in container provides scroll locking (`lockScroll` from [`@drawerly/core/dom`](/core/api/#lockscroll)), exit animations, and ARIA dialog semantics. A custom container implements none of this automatically. For most applications, unstyled mode with the built-in container is the better trade-off.
+The built-in container provides scroll locking, exit animations, and ARIA dialog semantics. A custom container implements none of this automatically. For most applications, unstyled mode with the built-in container is the better trade-off.
 :::
 
 ## Reading the Stack

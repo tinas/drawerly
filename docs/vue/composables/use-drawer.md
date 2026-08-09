@@ -98,7 +98,3 @@ const { instance, updateOptions } = useDrawer<ProductDrawerOptions>('product-dra
 console.log(instance.value?.price)
 updateOptions({ price: 899.99 })
 ```
-
-## Full API
-
-The composable returns `isOpen`, `isTop`, and `instance`, plus the `close`, `bringToTop`, and `updateOptions` methods. Each is documented in the [useDrawer API Reference](../api/use-drawer.md).

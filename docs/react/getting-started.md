@@ -30,7 +30,7 @@ export const drawerly = createDrawerly({
 })
 ```
 
-`defaultOptions` sets global defaults for all drawers, such as `placement` or the close behaviors. See the [createDrawerly API Reference](./api/create-drawerly.md) for the full list.
+`defaultOptions` sets global defaults for all drawers, such as `placement` or the close behaviors.
 
 Import the stylesheet once, in your entry file:
 
@@ -55,7 +55,7 @@ export function App() {
 }
 ```
 
-One container per application is enough. Its props (portal target, modal behavior, scroll locking) are documented in the [DrawerlyContainer API Reference](./api/drawer-container.md).
+One container per application is enough. It accepts props to change the portal target, disable modal behavior, or turn off scroll locking.
 
 ## Your First Drawer
 

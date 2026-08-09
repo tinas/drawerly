@@ -38,7 +38,7 @@ app.use(createDrawerly({
 app.mount('#app')
 ```
 
-`defaultOptions` sets global defaults for all drawers, such as `placement` or the close behaviors. See the [createDrawerly API Reference](./api/create-drawerly.md) for the full list.
+`defaultOptions` sets global defaults for all drawers, such as `placement` or the close behaviors.
 
 Then add `<DrawerlyContainer />` to your root template. It renders the open drawers:
 
@@ -56,7 +56,7 @@ import { DrawerlyContainer } from '@drawerly/vue'
 </template>
 ```
 
-One container per application is enough. Its props (teleport target, modal behavior, scroll locking) are documented in the [DrawerlyContainer API Reference](./api/drawer-container.md).
+One container per application is enough. It accepts props to change the teleport target, disable modal behavior, or turn off scroll locking.
 
 ## Your First Drawer
 

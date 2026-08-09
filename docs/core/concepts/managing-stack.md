@@ -14,16 +14,14 @@ manager.open({ drawerKey: 'profile' })
 // Stack: ['main-menu', 'settings', 'profile']
 ```
 
-If the key already exists, the drawer is not duplicated. Its options are replaced with what you pass and it moves to the top:
+If the key is already open, the drawer moves to the top and its options are rebuilt from your `defaultOptions` plus what you pass. Any field you omit falls back to the default; it does not carry over from the previous instance. To change a few fields without touching the rest, use `updateOptions()` instead:
 
 ```ts
 manager.open({
   drawerKey: 'product-123',
-  price: 79.99, // replaces the previous options entirely
+  price: 79.99,
 })
 ```
-
-Fields left out of the call are gone, not merged. To change part of an open drawer instead, use `updateOptions()` below.
 
 ## Closing
 

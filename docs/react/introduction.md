@@ -29,9 +29,10 @@ Every drawer is identified by a `drawerKey`. Opening a key that is already in th
 
 ## What's Included
 
-The package has four building blocks:
-
-[`createDrawerly()`](./api/create-drawerly.md) creates the instance, once, at module scope. No provider is needed; you import the instance where you use it. [`<DrawerlyContainer>`](./api/drawer-container.md) renders the open drawers and handles animations and scroll locking. [`useDrawerly()`](./hooks/use-drawerly.md) subscribes a component to the stack, and [`useDrawer()`](./hooks/use-drawer.md) binds a component to a single drawer.
+- `createDrawerly()` creates the instance, once, at module scope. No provider is needed; you import the instance where you use it.
+- `<DrawerlyContainer>` renders the open drawers and handles animations and scroll locking.
+- [`useDrawerly()`](./hooks/use-drawerly.md) subscribes a component to the stack.
+- [`useDrawer()`](./hooks/use-drawer.md) binds a component to a single drawer.
 
 Drawers render as `role="dialog"` panels with a backdrop and `aria-modal` semantics by default. If you want your own design, skip the stylesheet and style the markup yourself. See [Unstyled Mode](./unstyled-mode.md).
 

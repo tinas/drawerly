@@ -112,7 +112,3 @@ const { instance, updateOptions } = useDrawer<ProductDrawerOptions>(drawerly, 'p
 console.log(instance?.price)
 updateOptions({ price: 899.99 })
 ```
-
-## Full API
-
-The hook returns `isOpen`, `isTop`, and `instance`, plus the `close`, `bringToTop`, and `updateOptions` methods. Each is documented in the [useDrawer API Reference](../api/use-drawer.md).

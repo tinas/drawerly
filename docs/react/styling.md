@@ -76,7 +76,7 @@ drawerly.open({
 }
 ```
 
-You can also update these attributes on an open drawer with [`updateOptions`](./api/use-drawerly.md#updateoptions-key-patch), for example to toggle a `data-loading` state.
+You can also update these attributes on an open drawer with `updateOptions`, for example to toggle a `data-loading` state.
 
 ## Drawer Content
 

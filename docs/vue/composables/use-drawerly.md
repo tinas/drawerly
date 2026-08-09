@@ -111,7 +111,3 @@ drawerly.open({
 ```
 
 TypeScript then enforces the custom fields on `open()` and knows about them on every instance you read back.
-
-## Full API
-
-The instance implements the complete drawer manager API: `open`, `close`, `closeAll`, `bringToTop`, `updateOptions`, `updateDefaultOptions`, `isOpen`, `getState`, `getDrawerInstance`, `getTopDrawer`, `getDefaultOptions`, and `subscribe`. Each method is documented in the [useDrawerly API Reference](../api/use-drawerly.md).

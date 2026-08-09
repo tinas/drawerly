@@ -1,6 +1,6 @@
 # Defining Drawers
 
-Every drawer has a set of built-in options: `drawerKey`, `placement`, the close behaviors (`closeOnEscapeKey`, `closeOnBackdropClick`), the ARIA attributes, and `dataAttributes`. The full list is in the [API Reference](../api/#draweroptions).
+Every drawer has a set of built-in options: `drawerKey`, `placement`, the close behaviors (`closeOnEscapeKey`, `closeOnBackdropClick`), the ARIA attributes, and `dataAttributes`.
 
 Real applications usually need more than that: product data, user information, callbacks. Instead of storing that data somewhere else and keeping it in sync, extend the drawer options and let the drawer carry it.
 
@@ -53,7 +53,7 @@ const manager = createDrawerManager<ProductDrawerOptions>({
 })
 ```
 
-Every manager starts from the built-in `BASE_DRAWER_DEFAULTS` (`placement: 'right'`, `closeOnEscapeKey: true`, `closeOnBackdropClick: true`). Your `defaultOptions` are merged on top, and the options passed to `open()` are merged on top of that, so you only specify what differs. `undefined` and `null` are the exception: they are skipped, so a configured default stays in place instead of being erased. This lets you forward an optional prop as-is, `placement: props.placement`, without an extra check for whether it was actually passed.
+Fields you omit fall back to `defaultOptions`, so you only pass what differs from the default. Passing `undefined` or `null` for a field is treated the same as omitting it, which lets you forward an optional prop as-is (`placement: props.placement`) without an extra check.
 
 ## Dynamic Predicates
 
@@ -71,4 +71,4 @@ manager.open({
 })
 ```
 
-Adapters evaluate these predicates with the [`resolveDrawerPredicate`](../api/#resolvedrawerpredicate) helper.
+Adapters evaluate these predicates with the `resolveDrawerPredicate` helper exported from `@drawerly/core`.
