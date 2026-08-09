@@ -10,13 +10,13 @@ export default defineConfig({
     dts({
       entryRoot: 'src',
       outDirs: 'dist',
-      tsconfigPath: path.resolve(__dirname, 'tsconfig.json'),
+      tsconfigPath: path.resolve(import.meta.dirname, 'tsconfig.json'),
     }),
     {
       name: 'copy-css',
       closeBundle() {
-        const srcCss = path.resolve(__dirname, 'src/styles.css')
-        const distCss = path.resolve(__dirname, 'dist/styles.css')
+        const srcCss = path.resolve(import.meta.dirname, 'src/styles.css')
+        const distCss = path.resolve(import.meta.dirname, 'dist/styles.css')
 
         if (!fs.existsSync(srcCss)) {
           throw new Error('[@drawerly/core] src/styles.css not found.')
@@ -29,8 +29,8 @@ export default defineConfig({
   build: {
     lib: {
       entry: {
-        index: path.resolve(__dirname, 'src/index.ts'),
-        dom: path.resolve(__dirname, 'src/dom/index.ts'),
+        index: path.resolve(import.meta.dirname, 'src/index.ts'),
+        dom: path.resolve(import.meta.dirname, 'src/dom/index.ts'),
       },
       fileName: (_format, name) => `${name}.mjs`,
       formats: ['es'],

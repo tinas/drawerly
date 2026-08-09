@@ -13,7 +13,7 @@ export default defineConfig({
     dts({
       entryRoot: 'src',
       outDirs: 'dist',
-      tsconfigPath: path.resolve(__dirname, 'tsconfig.json'),
+      tsconfigPath: path.resolve(import.meta.dirname, 'tsconfig.json'),
       insertTypesEntry: true,
     }),
     {
@@ -30,7 +30,7 @@ export default defineConfig({
           )
         }
 
-        const distCss = path.resolve(__dirname, 'dist/style.css')
+        const distCss = path.resolve(import.meta.dirname, 'dist/style.css')
 
         if (!fs.existsSync(srcCss)) {
           throw new Error(
@@ -44,7 +44,7 @@ export default defineConfig({
   ],
   build: {
     lib: {
-      entry: path.resolve(__dirname, 'src/index.ts'),
+      entry: path.resolve(import.meta.dirname, 'src/index.ts'),
       fileName: () => 'index.mjs',
       formats: ['es'],
     },
