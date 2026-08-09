@@ -41,14 +41,15 @@
     "@drawerly/core": "workspace:*"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "catalog:",
-    "@vue/test-utils": "catalog:",
+    "@types/node": "catalog:",
+    "@vitejs/plugin-vue": "catalog:vue",
+    "@vue/test-utils": "catalog:vue",
     "jsdom": "catalog:",
     "typescript": "catalog:",
     "vite": "catalog:",
     "vite-plugin-dts": "catalog:",
     "vitest": "catalog:",
-    "vue": "catalog:",
-    "vue-tsc": "catalog:"
+    "vue": "catalog:vue",
+    "vue-tsc": "catalog:vue"
   }
 }

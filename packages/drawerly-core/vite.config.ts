@@ -9,7 +9,7 @@ export default defineConfig({
   plugins: [
     dts({
       entryRoot: 'src',
-      outDir: 'dist',
+      outDirs: 'dist',
       tsconfigPath: path.resolve(__dirname, 'tsconfig.json'),
     }),
     {

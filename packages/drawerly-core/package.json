@@ -35,6 +35,7 @@
     "test:lib": "vitest"
   },
   "devDependencies": {
+    "@types/node": "catalog:",
     "jsdom": "catalog:",
     "typescript": "catalog:",
     "vite": "catalog:",
