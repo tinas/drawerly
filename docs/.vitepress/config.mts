@@ -13,6 +13,7 @@ const GUIDES = [
 
 const PACKAGES = [
   { text: 'Vue', link: '/vue/introduction', activeMatch: '^/vue/' },
+  { text: 'React', link: '/react/introduction', activeMatch: '^/react/' },
   { text: 'Core', link: '/core/introduction', activeMatch: '^/core/' },
 ]
 
@@ -20,19 +21,38 @@ const VUE_PACKAGE_GUIDE = [
   { text: 'Introduction', link: '/vue/introduction' },
   { text: 'Getting Started', link: '/vue/getting-started' },
   { text: 'Styling', link: '/vue/styling' },
-  { text: 'Headless Mode', link: '/vue/headless-mode' },
+  { text: 'Unstyled Mode', link: '/vue/unstyled-mode' },
 ]
 
 const VUE_PACKAGE_COMPOSABLES = [
-  { text: 'useDrawerContext', link: '/vue/composables/use-drawer-context' },
-  { text: 'useDrawerInstance', link: '/vue/composables/use-drawer-instance' },
+  { text: 'useDrawerly', link: '/vue/composables/use-drawerly' },
+  { text: 'useDrawer', link: '/vue/composables/use-drawer' },
 ]
 
 const VUE_PACKAGE_API = [
+  { text: 'createDrawerly', link: '/vue/api/create-drawerly' },
   { text: 'DrawerlyContainer', link: '/vue/api/drawer-container' },
-  { text: 'DrawerPlugin', link: '/vue/api/plugin' },
-  { text: 'useDrawerContext', link: '/vue/api/use-drawer-context' },
-  { text: 'useDrawerInstance', link: '/vue/api/use-drawer-instance' },
+  { text: 'useDrawerly', link: '/vue/api/use-drawerly' },
+  { text: 'useDrawer', link: '/vue/api/use-drawer' },
+]
+
+const REACT_PACKAGE_GUIDE = [
+  { text: 'Introduction', link: '/react/introduction' },
+  { text: 'Getting Started', link: '/react/getting-started' },
+  { text: 'Styling', link: '/react/styling' },
+  { text: 'Unstyled Mode', link: '/react/unstyled-mode' },
+]
+
+const REACT_PACKAGE_HOOKS = [
+  { text: 'useDrawerly', link: '/react/hooks/use-drawerly' },
+  { text: 'useDrawer', link: '/react/hooks/use-drawer' },
+]
+
+const REACT_PACKAGE_API = [
+  { text: 'createDrawerly', link: '/react/api/create-drawerly' },
+  { text: 'DrawerlyContainer', link: '/react/api/drawer-container' },
+  { text: 'useDrawerly', link: '/react/api/use-drawerly' },
+  { text: 'useDrawer', link: '/react/api/use-drawer' },
 ]
 
 const CORE_PACKAGE_GUIDE = [
@@ -100,7 +120,7 @@ export default defineConfig({
       {
         text: 'Packages',
         items: PACKAGES,
-        activeMatch: '^/(vue|core)/',
+        activeMatch: '^/(vue|react|core)/',
       },
     ],
 
@@ -127,6 +147,20 @@ export default defineConfig({
         {
           text: 'API',
           items: VUE_PACKAGE_API,
+        },
+      ],
+      '/react/': [
+        {
+          text: 'React Package',
+          items: REACT_PACKAGE_GUIDE,
+        },
+        {
+          text: 'Hooks',
+          items: REACT_PACKAGE_HOOKS,
+        },
+        {
+          text: 'API',
+          items: REACT_PACKAGE_API,
         },
       ],
       '/core/': [

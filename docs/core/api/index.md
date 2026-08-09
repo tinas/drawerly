@@ -39,17 +39,6 @@ type DrawerOptionsWithoutKey<TDrawerOptions extends DrawerOptions = DrawerOption
 
 Drawer options without the `drawerKey` field.
 
-### DrawerUpdatableOptions
-
-```ts
-type DrawerUpdatableOptions<TDrawerOptions extends DrawerOptions = DrawerOptions>
-  = DrawerOptionsWithoutKey<TDrawerOptions>
-```
-
-Options of a drawer that can be updated at runtime.
-
-`drawerKey` is intentionally excluded.
-
 ### DrawerDefaultOptions
 
 ```ts
@@ -59,7 +48,16 @@ type DrawerDefaultOptions<TDrawerOptions extends DrawerOptions = DrawerOptions>
 
 Default options applied to new drawers.
 
-Partial version of `DrawerUpdatableOptions`.
+### DrawerPatch
+
+```ts
+type DrawerPatch<TDrawerOptions extends DrawerOptions = DrawerOptions>
+  = Partial<DrawerOptionsWithoutKey<TDrawerOptions>>
+```
+
+Partial set of options merged into a drawer on update.
+
+`drawerKey` is intentionally excluded.
 
 ### DrawerInstance
 
@@ -159,7 +157,7 @@ Extra data attributes applied to the overlay element.
 
 ```ts
 interface DrawerState<TDrawerOptions extends DrawerOptions = DrawerOptions> {
-  stack: DrawerInstance<TDrawerOptions>[]
+  stack: readonly DrawerInstance<TDrawerOptions>[]
 }
 ```
 
@@ -167,33 +165,49 @@ Drawer manager state.
 
 #### Properties
 
-**`stack`**: `DrawerInstance<TDrawerOptions>[]`
+**`stack`**: `readonly DrawerInstance<TDrawerOptions>[]`
 
 Current drawer stack. The last item is the topmost drawer.
+
+### DrawerManagerConfig
+
+```ts
+interface DrawerManagerConfig<TDrawerOptions extends DrawerOptions = DrawerOptions> {
+  initialStack?: readonly DrawerInstance<TDrawerOptions>[]
+  defaultOptions?: DrawerDefaultOptions<TDrawerOptions>
+}
+```
+
+Configuration accepted by `createDrawerManager`.
+
+#### Properties
+
+**`initialStack`**: `readonly DrawerInstance<TDrawerOptions>[]` (optional)
+
+Drawers present in the stack when the manager is created. Each entry goes through the same default merging as `open()`.
+
+**`defaultOptions`**: `DrawerDefaultOptions<TDrawerOptions>` (optional)
+
+Global default options merged into every opened drawer.
+
+Merged on top of `BASE_DRAWER_DEFAULTS`.
 
 ### DrawerManager
 
 ```ts
 interface DrawerManager<TDrawerOptions extends DrawerOptions = DrawerOptions> {
-  getState: () => DrawerState<TDrawerOptions>
-  getDrawerInstance: (key: DrawerKey) => DrawerInstance<TDrawerOptions> | undefined
-  getDefaultOptions: () => DrawerDefaultOptions<TDrawerOptions> | undefined
-  subscribe: (listener: DrawerListener<TDrawerOptions>) => Unsubscribe
-  open: (options: TDrawerOptions) => DrawerKey
-  close: (key?: DrawerKey) => void
-  bringToTop: (key: DrawerKey) => void
-  closeAll: () => void
-  updateDefaultOptions: (
-    updater: (
-      prev: DrawerDefaultOptions<TDrawerOptions> | undefined
-    ) => DrawerDefaultOptions<TDrawerOptions>
-  ) => void
-  updateOptions: (
-    key: DrawerKey,
-    updater: (
-      prev: DrawerUpdatableOptions<TDrawerOptions>
-    ) => DrawerUpdatableOptions<TDrawerOptions>
-  ) => void
+  getState(): DrawerState<TDrawerOptions>
+  getDrawerInstance(key: DrawerKey): DrawerInstance<TDrawerOptions> | undefined
+  getTopDrawer(): DrawerInstance<TDrawerOptions> | undefined
+  isOpen(key: DrawerKey): boolean
+  getDefaultOptions(): DrawerDefaultOptions<TDrawerOptions>
+  subscribe(listener: DrawerListener<TDrawerOptions>): Unsubscribe
+  open(options: TDrawerOptions): DrawerKey
+  close(key?: DrawerKey): void
+  bringToTop(key: DrawerKey): void
+  closeAll(): void
+  updateDefaultOptions(patch: DrawerDefaultOptions<TDrawerOptions>): void
+  updateOptions(key: DrawerKey, patch: DrawerPatch<TDrawerOptions>): void
 }
 ```
 
@@ -209,9 +223,17 @@ Returns the current drawer state.
 
 Returns a drawer instance by key, if it exists.
 
-**`getDefaultOptions()`**: `() => DrawerDefaultOptions<TDrawerOptions> | undefined`
+**`getTopDrawer()`**: `() => DrawerInstance<TDrawerOptions> | undefined`
 
-Returns the current global default options.
+Returns the topmost drawer instance, if any.
+
+**`isOpen(key)`**: `(key: DrawerKey) => boolean`
+
+Returns whether a drawer with the given key is in the stack.
+
+**`getDefaultOptions()`**: `() => DrawerDefaultOptions<TDrawerOptions>`
+
+Returns the current global default options. Always returns an object, since the built-in `BASE_DRAWER_DEFAULTS` are applied to every manager.
 
 **`subscribe(listener)`**: `(listener: DrawerListener<TDrawerOptions>) => Unsubscribe`
 
@@ -219,7 +241,7 @@ Subscribes to state changes.
 
 **`open(options)`**: `(options: TDrawerOptions) => DrawerKey`
 
-Opens or updates a drawer and moves it to the top of the stack.
+Opens a drawer at the top of the stack. If a drawer with the same key is already open, its options are replaced, not merged. Fields set to `undefined` or `null` are skipped, so a configured default stays in place instead of being erased.
 
 Returns the drawer key.
 
@@ -235,15 +257,29 @@ Moves the drawer with the given key to the top of the stack.
 
 Closes all drawers.
 
-**`updateDefaultOptions(updater)`**: `(updater: (prev: DrawerDefaultOptions<TDrawerOptions> | undefined) => DrawerDefaultOptions<TDrawerOptions>) => void`
+**`updateDefaultOptions(patch)`**: `(patch: DrawerDefaultOptions<TDrawerOptions>) => void`
 
-Updates the global default options used for future drawers.
+Merges a patch into the global default options used for future drawers. `undefined` and `null` entries in the patch are skipped and leave the current default in place.
 
-**`updateOptions(key, updater)`**: `(key: DrawerKey, updater: (prev: DrawerUpdatableOptions<TDrawerOptions>) => DrawerUpdatableOptions<TDrawerOptions>) => void`
+**`updateOptions(key, patch)`**: `(key: DrawerKey, patch: DrawerPatch<TDrawerOptions>) => void`
 
-Updates options for an existing drawer.
+Merges a patch into the options of an existing drawer. `drawerKey` cannot be changed through a patch, and `undefined`/`null` entries are skipped, leaving the drawer's current value in place.
 
-The updater receives the current options without `drawerKey` and must return the full updated options (still without `drawerKey`).
+## Constants
+
+### BASE_DRAWER_DEFAULTS
+
+```ts
+const BASE_DRAWER_DEFAULTS = {
+  placement: 'right',
+  closeOnEscapeKey: true,
+  closeOnBackdropClick: true,
+} as const satisfies DrawerDefaultOptions
+```
+
+Built-in defaults applied to every drawer manager.
+
+User-provided `defaultOptions` are merged on top of these values.
 
 ## Functions
 
@@ -251,8 +287,7 @@ The updater receives the current options without `drawerKey` and must return the
 
 ```ts
 function createDrawerManager<TDrawerOptions extends DrawerOptions = DrawerOptions>(
-  initialState?: Partial<DrawerState<TDrawerOptions>>,
-  defaultOptions?: DrawerDefaultOptions<TDrawerOptions>
+  config?: DrawerManagerConfig<TDrawerOptions>
 ): DrawerManager<TDrawerOptions>
 ```
 
@@ -260,14 +295,66 @@ Creates a new drawer manager backed by an in-memory stack.
 
 #### Parameters
 
-**`initialState`**: `Partial<DrawerState<TDrawerOptions>>` (optional)
+**`config`**: `DrawerManagerConfig<TDrawerOptions>` (optional)
 
-Initial state for the drawer manager. Can include a pre-populated stack.
-
-**`defaultOptions`**: `DrawerDefaultOptions<TDrawerOptions>` (optional)
-
-Default options applied to all new drawers. These options are merged with the options provided when opening a drawer.
+Manager configuration. `initialStack` pre-populates the drawer stack, going through the same default merging as `open()`. `defaultOptions` provides global defaults merged on top of `BASE_DRAWER_DEFAULTS`.
 
 #### Returns
 
 `DrawerManager<TDrawerOptions>` - A drawer manager instance with methods to manage the drawer stack.
+
+### resolveDrawerPredicate
+
+```ts
+function resolveDrawerPredicate<TInstance>(
+  predicate: DrawerPredicate<TInstance> | undefined,
+  instance: TInstance,
+  fallback = true
+): boolean
+```
+
+Resolves a `DrawerPredicate` against a drawer instance.
+
+Adapters use this helper to evaluate boolean-or-function options such as `closeOnEscapeKey` and `closeOnBackdropClick`.
+
+#### Parameters
+
+**`predicate`**: `DrawerPredicate<TInstance> | undefined`
+
+The predicate to resolve. Booleans are returned as-is, and functions are called with the drawer instance.
+
+**`instance`**: `TInstance`
+
+The drawer instance passed to function predicates.
+
+**`fallback`**: `boolean` (optional)
+
+Value returned when the predicate is `undefined`.
+
+Default: `true`
+
+#### Returns
+
+`boolean` - The resolved predicate value.
+
+## `@drawerly/core/dom`
+
+Framework-agnostic DOM helpers used by the adapters, imported from a separate subpath:
+
+```ts
+import { lockScroll } from '@drawerly/core/dom'
+```
+
+### lockScroll
+
+```ts
+function lockScroll(): () => void
+```
+
+Prevents the page from scrolling and returns a release function.
+
+Locks are reference counted: overlapping calls only restore the original styles once the last one is released, so this is safe to call from more than one open drawer at a time. On iOS Safari, where `overflow: hidden` on `<body>` does not stop scrolling, it takes the page out of flow instead and restores the scroll position on release.
+
+#### Returns
+
+`() => void` - Releases this lock. Safe to call more than once.

@@ -15,6 +15,9 @@ hero:
     - theme: alt
       text: Vue Guide
       link: /vue/getting-started
+    - theme: alt
+      text: React Guide
+      link: /react/getting-started
 
 features:
   - title: Manage Multiple Drawers
@@ -23,9 +26,9 @@ features:
 
   - title: Framework-Agnostic Core
     icon: 🧭
-    details: Built on a framework-agnostic core. Use the Vue adapter today or build your own adapter for any framework.
+    details: Built on a framework-agnostic core. Use the Vue and React adapters today or build your own adapter for any framework.
 
   - title: Style It Your Way
     icon: 🎨
-    details: Use the included styles, customize with CSS variables, or go fully headless and build your own UI from scratch.
+    details: Use the included styles, customize with CSS variables, or skip the stylesheet entirely and build your own UI from scratch.
 ---

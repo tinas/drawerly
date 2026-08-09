@@ -4,10 +4,10 @@ The default stylesheet gives drawers a complete look out of the box. Customize i
 
 ## Including the Styles
 
-Import the stylesheet once, next to where you install the instance:
+Import the stylesheet once, in your entry file:
 
-```ts [main.ts]
-import '@drawerly/vue/style.css'
+```ts [main.tsx]
+import '@drawerly/react/style.css'
 ```
 
 ## CSS Variables
@@ -80,17 +80,20 @@ You can also update these attributes on an open drawer with [`updateOptions`](./
 
 ## Drawer Content
 
-Your component fills the panel, so its layout is ordinary Vue styling. A typical drawer stretches to full height with a scrollable body:
+Your component fills the panel, so its layout is ordinary React styling. A typical drawer stretches to full height with a scrollable body:
 
-```vue
-<template>
-  <div class="drawer">
-    <header>...</header>
-    <div class="body">...</div>
-  </div>
-</template>
+```tsx
+export function DrawerContent() {
+  return (
+    <div className="drawer">
+      <header>...</header>
+      <div className="body">...</div>
+    </div>
+  )
+}
+```
 
-<style scoped>
+```css
 .drawer {
   height: 100%;
   display: flex;
@@ -101,7 +104,6 @@ Your component fills the panel, so its layout is ordinary Vue styling. A typical
   flex: 1;
   overflow-y: auto;
 }
-</style>
 ```
 
 ## Going Further

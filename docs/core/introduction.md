@@ -1,15 +1,6 @@
 # Introduction
 
-`@drawerly/core` provides a drawer stack manager with zero UI dependencies. This package manages drawer state, stacking order, and lifecycle events. Framework adapters consume this package to provide UI components.
-
-## Key Features
-
-- **Stack management** – Open, close, reorder, and clear drawers with a simple API
-- **No UI coupling** – Pure state management with no DOM dependencies
-- **Type-safe** – Full TypeScript support with generic options
-- **Subscription model** – Subscribe to state changes to power any rendering layer
-
-## Basic Example
+`@drawerly/core` is a framework-agnostic drawer stack manager. It tracks which drawers are open, in what order, and with what options. There is no DOM or UI code in it; framework adapters such as [@drawerly/vue](/vue/introduction) consume this package and add the rendering layer.
 
 ```ts
 import { createDrawerManager } from '@drawerly/core'
@@ -23,7 +14,6 @@ manager.open({
 manager.open({
   drawerKey: 'profile',
   placement: 'left',
-  ariaLabel: 'Settings Drawer',
 })
 
 manager.bringToTop('settings')
@@ -31,4 +21,6 @@ manager.bringToTop('settings')
 manager.close('settings')
 ```
 
-The manager stores drawers in an in-memory stack. Opening a drawer that already exists updates it and moves it to the top. Closing without a key removes the topmost entry.
+The manager stores drawers in an in-memory stack. Opening a key that already exists replaces its options and moves it to the top. Closing without a key removes the topmost entry. Subscribers are notified on every change, which is how a rendering layer stays in sync.
+
+Drawer options are fully typed and extensible: add your own fields to `DrawerOptions` and TypeScript enforces them across the whole API. See [Defining Drawers](./concepts/defining-drawers).
