@@ -25,23 +25,7 @@ All visual aspects are controlled by CSS variables defined on `[data-drawerly-ro
 }
 ```
 
-The full list of variables and data attributes is in the [styling reference](/core/concepts/styling).
-
-## Styling by Placement
-
-Each drawer's overlay carries a `data-drawerly-placement` attribute, so different placements can look different:
-
-```css
-[data-drawerly-placement="right"] {
-  --drawerly-panel-width: 600px;
-}
-
-/* Bottom sheets on mobile */
-[data-drawerly-placement="bottom"] {
-  --drawerly-panel-height: 400px;
-  --drawerly-panel-radius: 16px 16px 0 0;
-}
-```
+The full list of variables and data attributes is in the [core styling reference](/core/concepts/styling).
 
 ## Dark Mode
 
@@ -55,28 +39,6 @@ Scope the variables to your theme selector:
 ```
 
 The same works with `@media (prefers-color-scheme: dark)`.
-
-## Styling Specific Drawers
-
-The `dataAttributes` option adds custom attributes to a drawer's overlay element, which you can target from CSS:
-
-```ts
-drawerly.open({
-  drawerKey: 'settings',
-  component: SettingsPanel,
-  dataAttributes: {
-    'data-category': 'settings',
-  },
-})
-```
-
-```css
-[data-drawerly-overlay][data-category="settings"] [data-drawerly-panel] {
-  border-left: 4px solid #3b82f6;
-}
-```
-
-You can also update these attributes on an open drawer with `updateOptions`, for example to toggle a `data-loading` state.
 
 ## Drawer Content
 

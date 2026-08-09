@@ -25,7 +25,7 @@ export function HomePage() {
 }
 ```
 
-Every drawer is identified by a `drawerKey`. Opening a key that is already in the stack replaces that drawer's options and brings it to the top, so you never end up with duplicates.
+Every drawer is identified by a `drawerKey`.
 
 ## What's Included
 
@@ -35,7 +35,3 @@ Every drawer is identified by a `drawerKey`. Opening a key that is already in th
 - [`useDrawer()`](./hooks/use-drawer.md) binds a component to a single drawer.
 
 Drawers render as `role="dialog"` panels with a backdrop and `aria-modal` semantics by default. If you want your own design, skip the stylesheet and style the markup yourself. See [Unstyled Mode](./unstyled-mode.md).
-
-## Next
-
-Head to [Getting Started](./getting-started.md) to set it up.

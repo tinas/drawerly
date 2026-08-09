@@ -50,7 +50,7 @@ drawerly.close('edit-42') // specific drawer
 drawerly.closeAll() // everything
 ```
 
-Every close path plays the exit animation before the drawer leaves the DOM. To switch between open drawers without reopening them, use `bringToTop(key)`.
+To switch between open drawers without reopening them, use `bringToTop(key)`.
 
 ## Reactive State
 
