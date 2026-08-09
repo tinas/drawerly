@@ -4,6 +4,15 @@
   "version": "0.2.0",
   "author": "Ahmet Tinastepe <ahmettinastepe0@gmail.com>",
   "license": "MIT",
+  "homepage": "https://drawerly.dev",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tinas/drawerly.git",
+    "directory": "packages/drawerly-vue"
+  },
+  "bugs": {
+    "url": "https://github.com/tinas/drawerly/issues"
+  },
   "keywords": [
     "drawer",
     "drawer-manager",
