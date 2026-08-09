@@ -28,15 +28,12 @@ export default defineConfig({
   ],
   build: {
     lib: {
-      entry: path.resolve(__dirname, 'src/index.ts'),
-      name: 'DrawerlyCore',
-      fileName: format => (format === 'es' ? 'index.mjs' : 'index.cjs'),
-      formats: ['es', 'cjs'],
-    },
-    rollupOptions: {
-      output: {
-        exports: 'named',
+      entry: {
+        index: path.resolve(__dirname, 'src/index.ts'),
+        dom: path.resolve(__dirname, 'src/dom/index.ts'),
       },
+      fileName: (_format, name) => `${name}.mjs`,
+      formats: ['es'],
     },
     emptyOutDir: true,
     sourcemap: true,

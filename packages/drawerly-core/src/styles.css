@@ -1,18 +1,18 @@
 [data-drawerly-root] {
   /* Backdrop */
   --drawerly-backdrop-bg: rgba(0, 0, 0, 0.5);
-  
+
   /* Panel appearance */
   --drawerly-panel-bg: white;
   --drawerly-panel-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
   --drawerly-panel-width: 400px;
   --drawerly-panel-height: 300px;
   --drawerly-panel-radius: 16px;
-  
+
   /* Animations */
   --drawerly-transition-duration: 300ms;
   --drawerly-transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
-  
+
   /* Layering */
   --drawerly-z-index: 1000;
 }
@@ -32,13 +32,6 @@
   position: absolute;
   inset: 0;
   background: var(--drawerly-backdrop-bg);
-  animation: drawerly-fade-in var(--drawerly-transition-duration)
-    var(--drawerly-transition-timing);
-}
-
-[data-drawerly-overlay][data-closing] [data-drawerly-backdrop] {
-  animation: drawerly-fade-out var(--drawerly-transition-duration)
-    var(--drawerly-transition-timing);
 }
 
 [data-drawerly-panel] {
@@ -49,6 +42,19 @@
   transition:
     width var(--drawerly-transition-duration) var(--drawerly-transition-timing),
     height var(--drawerly-transition-duration) var(--drawerly-transition-timing);
+}
+
+/* Enter and leave timing is read off the overlay, so its animation is what
+   decides when a drawer is done animating. Panel animations run alongside it
+   and must share the same duration. */
+[data-drawerly-overlay].drawerly-enter-active {
+  animation: drawerly-fade-in var(--drawerly-transition-duration)
+    var(--drawerly-transition-timing);
+}
+
+[data-drawerly-overlay].drawerly-leave-active {
+  animation: drawerly-fade-out var(--drawerly-transition-duration)
+    var(--drawerly-transition-timing);
 }
 
 /* Placement: Right */
@@ -67,14 +73,12 @@
   width: var(--drawerly-panel-width);
 }
 
-/* New drawer sliding in from right */
-[data-drawerly-placement='right'][data-entering] [data-drawerly-panel] {
+[data-drawerly-placement='right'].drawerly-enter-active [data-drawerly-panel] {
   animation: drawerly-slide-in-right var(--drawerly-transition-duration)
     var(--drawerly-transition-timing);
 }
 
-/* Closing drawer sliding out to right */
-[data-drawerly-placement='right'][data-closing] [data-drawerly-panel] {
+[data-drawerly-placement='right'].drawerly-leave-active [data-drawerly-panel] {
   animation: drawerly-slide-out-right var(--drawerly-transition-duration)
     var(--drawerly-transition-timing);
 }
@@ -94,12 +98,12 @@
   width: var(--drawerly-panel-width);
 }
 
-[data-drawerly-placement='left'][data-entering] [data-drawerly-panel] {
+[data-drawerly-placement='left'].drawerly-enter-active [data-drawerly-panel] {
   animation: drawerly-slide-in-left var(--drawerly-transition-duration)
     var(--drawerly-transition-timing);
 }
 
-[data-drawerly-placement='left'][data-closing] [data-drawerly-panel] {
+[data-drawerly-placement='left'].drawerly-leave-active [data-drawerly-panel] {
   animation: drawerly-slide-out-left var(--drawerly-transition-duration)
     var(--drawerly-transition-timing);
 }
@@ -119,12 +123,12 @@
   height: var(--drawerly-panel-height);
 }
 
-[data-drawerly-placement='top'][data-entering] [data-drawerly-panel] {
+[data-drawerly-placement='top'].drawerly-enter-active [data-drawerly-panel] {
   animation: drawerly-slide-in-top var(--drawerly-transition-duration)
     var(--drawerly-transition-timing);
 }
 
-[data-drawerly-placement='top'][data-closing] [data-drawerly-panel] {
+[data-drawerly-placement='top'].drawerly-leave-active [data-drawerly-panel] {
   animation: drawerly-slide-out-top var(--drawerly-transition-duration)
     var(--drawerly-transition-timing);
 }
@@ -144,12 +148,12 @@
   height: var(--drawerly-panel-height);
 }
 
-[data-drawerly-placement='bottom'][data-entering] [data-drawerly-panel] {
+[data-drawerly-placement='bottom'].drawerly-enter-active [data-drawerly-panel] {
   animation: drawerly-slide-in-bottom var(--drawerly-transition-duration)
     var(--drawerly-transition-timing);
 }
 
-[data-drawerly-placement='bottom'][data-closing] [data-drawerly-panel] {
+[data-drawerly-placement='bottom'].drawerly-leave-active [data-drawerly-panel] {
   animation: drawerly-slide-out-bottom var(--drawerly-transition-duration)
     var(--drawerly-transition-timing);
 }
@@ -168,48 +172,39 @@
   }
 }
 
-/* Slide + fade */
 @keyframes drawerly-slide-in-right {
   from {
     transform: translateX(100%);
-    opacity: 0;
   }
   to {
     transform: translateX(0);
-    opacity: 1;
   }
 }
 
 @keyframes drawerly-slide-in-left {
   from {
     transform: translateX(-100%);
-    opacity: 0;
   }
   to {
     transform: translateX(0);
-    opacity: 1;
   }
 }
 
 @keyframes drawerly-slide-in-top {
   from {
     transform: translateY(-100%);
-    opacity: 0;
   }
   to {
     transform: translateY(0);
-    opacity: 1;
   }
 }
 
 @keyframes drawerly-slide-in-bottom {
   from {
     transform: translateY(100%);
-    opacity: 0;
   }
   to {
     transform: translateY(0);
-    opacity: 1;
   }
 }
 
@@ -226,57 +221,45 @@
 @keyframes drawerly-slide-out-right {
   from {
     transform: translateX(0);
-    opacity: 1;
   }
   to {
     transform: translateX(100%);
-    opacity: 0;
   }
 }
 
 @keyframes drawerly-slide-out-left {
   from {
     transform: translateX(0);
-    opacity: 1;
   }
   to {
     transform: translateX(-100%);
-    opacity: 0;
   }
 }
 
 @keyframes drawerly-slide-out-top {
   from {
     transform: translateY(0);
-    opacity: 1;
   }
   to {
     transform: translateY(-100%);
-    opacity: 0;
   }
 }
 
 @keyframes drawerly-slide-out-bottom {
   from {
     transform: translateY(0);
-    opacity: 1;
   }
   to {
     transform: translateY(100%);
-    opacity: 0;
   }
 }
 
 /* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
-  [data-drawerly-root] {
-    --drawerly-transition-duration: 0.001ms;
-    --drawerly-transition-timing: linear;
-  }
-
-  [data-drawerly-backdrop],
-  [data-drawerly-placement][data-entering] [data-drawerly-panel],
-  [data-drawerly-placement][data-closing] [data-drawerly-panel] {
+  [data-drawerly-overlay].drawerly-enter-active,
+  [data-drawerly-overlay].drawerly-leave-active,
+  [data-drawerly-overlay].drawerly-enter-active [data-drawerly-panel],
+  [data-drawerly-overlay].drawerly-leave-active [data-drawerly-panel] {
     animation: none !important;
   }
 
