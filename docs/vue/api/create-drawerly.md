@@ -82,13 +82,13 @@ Vue plugin hook, invoked by `app.use(drawerly)`.
 
 The instance is a plain object and works outside components too:
 
-```ts
-// drawerly.ts
-export const drawerly = createDrawerly()
-
-// router.ts
+```ts [drawerly.ts]
 import { drawerly } from './drawerly'
 
+export const drawerly = createDrawerly()
+```
+
+```ts [router.ts]
 router.beforeEach(() => {
   drawerly.closeAll()
 })

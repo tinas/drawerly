@@ -167,74 +167,70 @@ export interface DrawerManagerConfig<
  *
  * @public
  */
-/* eslint-disable ts/method-signature-style -- method syntax keeps
-   `DrawerManager<Extended>` assignable to `DrawerManager<Base>`, which is what
-   lets adapters hold a manager behind a non-generic injection key. */
 export interface DrawerManager<
   TDrawerOptions extends DrawerOptions = DrawerOptions,
 > {
   /**
    * Returns the current drawer state.
    */
-  getState(): DrawerState<TDrawerOptions>
+  getState: () => DrawerState<TDrawerOptions>
 
   /**
    * Returns a drawer instance by key, if it exists.
    */
-  getDrawerInstance(key: DrawerKey): DrawerInstance<TDrawerOptions> | undefined
+  getDrawerInstance: (key: DrawerKey) => DrawerInstance<TDrawerOptions> | undefined
 
   /**
    * Returns the topmost drawer instance, if any.
    */
-  getTopDrawer(): DrawerInstance<TDrawerOptions> | undefined
+  getTopDrawer: () => DrawerInstance<TDrawerOptions> | undefined
 
   /**
    * Returns whether a drawer with the given key is in the stack.
    */
-  isOpen(key: DrawerKey): boolean
+  isOpen: (key: DrawerKey) => boolean
 
   /**
    * Returns the current global default options.
    */
-  getDefaultOptions(): DrawerDefaultOptions<TDrawerOptions>
+  getDefaultOptions: () => DrawerDefaultOptions<TDrawerOptions>
 
   /**
    * Subscribes to state changes.
    */
-  subscribe(listener: DrawerListener<TDrawerOptions>): Unsubscribe
+  subscribe: (listener: DrawerListener<TDrawerOptions>) => Unsubscribe
 
   /**
    * Opens a drawer at the top of the stack. Options of an already open
    * drawer are replaced.
    */
-  open(options: TDrawerOptions): DrawerKey
+  open: (options: TDrawerOptions) => DrawerKey
 
   /**
    * Closes the top drawer or the drawer with the given key.
    */
-  close(key?: DrawerKey): void
+  close: (key?: DrawerKey) => void
 
   /**
    * Moves the drawer with the given key to the top of the stack.
    */
-  bringToTop(key: DrawerKey): void
+  bringToTop: (key: DrawerKey) => void
 
   /**
    * Closes all drawers.
    */
-  closeAll(): void
+  closeAll: () => void
 
   /**
    * Merges a patch into the global default options used for future drawers.
    */
-  updateDefaultOptions(patch: DrawerDefaultOptions<TDrawerOptions>): void
+  updateDefaultOptions: (patch: DrawerDefaultOptions<TDrawerOptions>) => void
 
   /**
    * Merges a patch into the options of an existing drawer.
    */
-  updateOptions(key: DrawerKey, patch: DrawerPatch<TDrawerOptions>): void
+  updateOptions: (key: DrawerKey, patch: DrawerPatch<TDrawerOptions>) => void
 }
-/* eslint-enable ts/method-signature-style */
 
 /**
  * Built-in defaults applied to every drawer manager.

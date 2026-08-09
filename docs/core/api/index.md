@@ -196,18 +196,18 @@ Merged on top of `BASE_DRAWER_DEFAULTS`.
 
 ```ts
 interface DrawerManager<TDrawerOptions extends DrawerOptions = DrawerOptions> {
-  getState(): DrawerState<TDrawerOptions>
-  getDrawerInstance(key: DrawerKey): DrawerInstance<TDrawerOptions> | undefined
-  getTopDrawer(): DrawerInstance<TDrawerOptions> | undefined
-  isOpen(key: DrawerKey): boolean
-  getDefaultOptions(): DrawerDefaultOptions<TDrawerOptions>
-  subscribe(listener: DrawerListener<TDrawerOptions>): Unsubscribe
-  open(options: TDrawerOptions): DrawerKey
-  close(key?: DrawerKey): void
-  bringToTop(key: DrawerKey): void
-  closeAll(): void
-  updateDefaultOptions(patch: DrawerDefaultOptions<TDrawerOptions>): void
-  updateOptions(key: DrawerKey, patch: DrawerPatch<TDrawerOptions>): void
+  getState: () => DrawerState<TDrawerOptions>
+  getDrawerInstance: (key: DrawerKey) => DrawerInstance<TDrawerOptions> | undefined
+  getTopDrawer: () => DrawerInstance<TDrawerOptions> | undefined
+  isOpen: (key: DrawerKey) => boolean
+  getDefaultOptions: () => DrawerDefaultOptions<TDrawerOptions>
+  subscribe: (listener: DrawerListener<TDrawerOptions>) => Unsubscribe
+  open: (options: TDrawerOptions) => DrawerKey
+  close: (key?: DrawerKey) => void
+  bringToTop: (key: DrawerKey) => void
+  closeAll: () => void
+  updateDefaultOptions: (patch: DrawerDefaultOptions<TDrawerOptions>) => void
+  updateOptions: (key: DrawerKey, patch: DrawerPatch<TDrawerOptions>) => void
 }
 ```
 

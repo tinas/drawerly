@@ -11,7 +11,7 @@ import { drawerlyInjectionKey } from './injection'
 export function useDrawerly<
   TDrawerOptions extends VueDrawerOptions = VueDrawerOptions,
 >(): Drawerly<TDrawerOptions> {
-  const drawerly = inject(drawerlyInjectionKey)
+  const drawerly = inject<Drawerly<TDrawerOptions>>(drawerlyInjectionKey)
 
   if (!drawerly) {
     throw new Error(
@@ -19,5 +19,5 @@ export function useDrawerly<
     )
   }
 
-  return drawerly as Drawerly<TDrawerOptions>
+  return drawerly
 }
