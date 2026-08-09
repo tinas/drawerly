@@ -3,13 +3,19 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
+    "docs:api": "node run-typedoc.mjs",
+    "predocs:dev": "pnpm docs:api",
+    "predocs:build": "pnpm docs:api",
     "docs:dev": "vitepress dev",
     "docs:build": "vitepress build",
     "docs:preview": "vitepress preview"
   },
   "devDependencies": {
-    "vitepress": "catalog:",
-    "vitepress-plugin-group-icons": "catalog:",
-    "vue": "catalog:"
+    "typedoc": "catalog:doc",
+    "typedoc-plugin-markdown": "catalog:doc",
+    "typedoc-vitepress-theme": "catalog:doc",
+    "vitepress": "catalog:doc",
+    "vitepress-plugin-group-icons": "catalog:doc",
+    "vue": "catalog:vue"
   }
 }

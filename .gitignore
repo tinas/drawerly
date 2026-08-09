@@ -6,3 +6,9 @@ node_modules
 dist
 logs
 .eslintcache
+
+# Generated API reference (see docs/run-typedoc.mjs)
+docs/core/api
+docs/react/api
+docs/vue/api
+

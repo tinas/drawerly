@@ -9,11 +9,6 @@ Drawerly focuses on predictable behavior, clean APIs, and full control over pres
 
 For full documentation, visit **[drawerly.dev](https://drawerly.dev)**
 
-## 📦 Packages
-
-- **[@drawerly/core](./packages/drawerly-core)** - Framework-agnostic core engine
-- **[@drawerly/vue](./packages/drawerly-vue)** - Vue 3 adapter
-
 ## License
 
 MIT

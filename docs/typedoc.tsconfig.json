@@ -1,0 +1,27 @@
+{
+  "include": ["../packages/*/src/**/*.ts", "../packages/*/src/**/*.tsx"],
+  "exclude": [
+    "../packages/*/tests/**",
+    "../packages/*/dist/**",
+    "**/*.spec.ts",
+    "**/*.test.ts"
+  ],
+  "compilerOptions": {
+    "rootDir": "..",
+    "noEmit": true,
+    "paths": {
+      "@drawerly/core": ["../packages/drawerly-core/src"],
+      "@drawerly/core/dom": ["../packages/drawerly-core/src/dom"]
+    },
+    "target": "esnext",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "skipLibCheck": true,
+    "strict": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "jsx": "preserve",
+    "lib": ["esnext", "dom"]
+  }
+}

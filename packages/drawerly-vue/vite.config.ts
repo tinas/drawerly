@@ -14,8 +14,8 @@ export default defineConfig({
     vue(),
     dts({
       entryRoot: 'src',
-      outDir: 'dist',
-      tsconfigPath: path.resolve(__dirname, 'tsconfig.json'),
+      outDirs: 'dist',
+      tsconfigPath: path.resolve(import.meta.dirname, 'tsconfig.json'),
       insertTypesEntry: true,
     }),
     {
@@ -32,7 +32,7 @@ export default defineConfig({
           )
         }
 
-        const distCss = path.resolve(__dirname, 'dist/style.css')
+        const distCss = path.resolve(import.meta.dirname, 'dist/style.css')
 
         if (!fs.existsSync(srcCss)) {
           throw new Error(
@@ -46,19 +46,12 @@ export default defineConfig({
   ],
   build: {
     lib: {
-      entry: path.resolve(__dirname, 'src/index.ts'),
-      name: 'DrawerlyVue',
-      fileName: format => (format === 'es' ? 'index.mjs' : 'index.cjs'),
-      formats: ['es', 'cjs'],
+      entry: path.resolve(import.meta.dirname, 'src/index.ts'),
+      fileName: () => 'index.mjs',
+      formats: ['es'],
     },
     rollupOptions: {
-      external: ['vue', '@drawerly/core'],
-      output: {
-        exports: 'named',
-        globals: {
-          vue: 'Vue',
-        },
-      },
+      external: ['vue', /^@drawerly\/core/],
     },
     emptyOutDir: true,
     sourcemap: true,

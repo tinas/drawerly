@@ -9,14 +9,14 @@ export default defineConfig({
   plugins: [
     dts({
       entryRoot: 'src',
-      outDir: 'dist',
-      tsconfigPath: path.resolve(__dirname, 'tsconfig.json'),
+      outDirs: 'dist',
+      tsconfigPath: path.resolve(import.meta.dirname, 'tsconfig.json'),
     }),
     {
       name: 'copy-css',
       closeBundle() {
-        const srcCss = path.resolve(__dirname, 'src/styles.css')
-        const distCss = path.resolve(__dirname, 'dist/styles.css')
+        const srcCss = path.resolve(import.meta.dirname, 'src/styles.css')
+        const distCss = path.resolve(import.meta.dirname, 'dist/styles.css')
 
         if (!fs.existsSync(srcCss)) {
           throw new Error('[@drawerly/core] src/styles.css not found.')
@@ -28,15 +28,12 @@ export default defineConfig({
   ],
   build: {
     lib: {
-      entry: path.resolve(__dirname, 'src/index.ts'),
-      name: 'DrawerlyCore',
-      fileName: format => (format === 'es' ? 'index.mjs' : 'index.cjs'),
-      formats: ['es', 'cjs'],
-    },
-    rollupOptions: {
-      output: {
-        exports: 'named',
+      entry: {
+        index: path.resolve(import.meta.dirname, 'src/index.ts'),
+        dom: path.resolve(import.meta.dirname, 'src/dom/index.ts'),
       },
+      fileName: (_format, name) => `${name}.mjs`,
+      formats: ['es'],
     },
     emptyOutDir: true,
     sourcemap: true,

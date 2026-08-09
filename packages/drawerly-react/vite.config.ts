@@ -1,0 +1,66 @@
+/// <reference types="vitest/config" />
+
+import fs from 'node:fs'
+import { createRequire } from 'node:module'
+import path from 'node:path'
+import { defineConfig } from 'vite'
+import dts from 'vite-plugin-dts'
+
+const require = createRequire(import.meta.url)
+
+export default defineConfig({
+  plugins: [
+    dts({
+      entryRoot: 'src',
+      outDirs: 'dist',
+      tsconfigPath: path.resolve(import.meta.dirname, 'tsconfig.json'),
+      insertTypesEntry: true,
+    }),
+    {
+      name: 'copy-css',
+      closeBundle() {
+        let srcCss: string
+
+        try {
+          srcCss = require.resolve('@drawerly/core/styles.css')
+        }
+        catch {
+          throw new Error(
+            '[@drawerly/react] Could not resolve "@drawerly/core/styles.css". Make sure @drawerly/core is built and exported correctly.',
+          )
+        }
+
+        const distCss = path.resolve(import.meta.dirname, 'dist/style.css')
+
+        if (!fs.existsSync(srcCss)) {
+          throw new Error(
+            `[@drawerly/react] Resolved styles.css from @drawerly/core does not exist:\n${srcCss}`,
+          )
+        }
+
+        fs.copyFileSync(srcCss, distCss)
+      },
+    },
+  ],
+  build: {
+    lib: {
+      entry: path.resolve(import.meta.dirname, 'src/index.ts'),
+      fileName: () => 'index.mjs',
+      formats: ['es'],
+    },
+    rollupOptions: {
+      external: [
+        'react',
+        'react-dom',
+        'react/jsx-runtime',
+        /^@drawerly\/core/,
+      ],
+    },
+    emptyOutDir: true,
+    sourcemap: true,
+  },
+  test: {
+    environment: 'jsdom',
+    globals: true,
+  },
+})

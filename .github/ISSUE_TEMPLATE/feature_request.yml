@@ -1,0 +1,37 @@
+name: 🚀 Feature Request
+description: Suggest a new feature or improvement.
+title: '[Feature]: '
+labels: [enhancement, pending triage]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the suggestion! Please describe the problem before the solution so we can evaluate the use case.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: Describe the use case or pain point. Focus on the "why" before the "how".
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: How would you like to see this addressed? Sample API, code snippets, or diagrams are welcome.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Any workarounds you tried, or existing APIs that partly solve this.
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Links, references, related libraries, or anything else useful.
