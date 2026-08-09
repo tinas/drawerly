@@ -1,5 +1,8 @@
 import { defineConfig } from 'vitepress'
 import { groupIconMdPlugin, groupIconVitePlugin } from 'vitepress-plugin-group-icons'
+import coreApiSidebar from '../core/api/typedoc-sidebar.json' with { type: 'json' }
+import reactApiSidebar from '../react/api/typedoc-sidebar.json' with { type: 'json' }
+import vueApiSidebar from '../vue/api/typedoc-sidebar.json' with { type: 'json' }
 
 const META_URL = 'https://drawerly.dev'
 const META_TITLE = 'Drawerly'
@@ -29,13 +32,6 @@ const VUE_PACKAGE_COMPOSABLES = [
   { text: 'useDrawer', link: '/vue/composables/use-drawer' },
 ]
 
-const VUE_PACKAGE_API = [
-  { text: 'createDrawerly', link: '/vue/api/create-drawerly' },
-  { text: 'DrawerlyContainer', link: '/vue/api/drawer-container' },
-  { text: 'useDrawerly', link: '/vue/api/use-drawerly' },
-  { text: 'useDrawer', link: '/vue/api/use-drawer' },
-]
-
 const REACT_PACKAGE_GUIDE = [
   { text: 'Introduction', link: '/react/introduction' },
   { text: 'Getting Started', link: '/react/getting-started' },
@@ -48,13 +44,6 @@ const REACT_PACKAGE_HOOKS = [
   { text: 'useDrawer', link: '/react/hooks/use-drawer' },
 ]
 
-const REACT_PACKAGE_API = [
-  { text: 'createDrawerly', link: '/react/api/create-drawerly' },
-  { text: 'DrawerlyContainer', link: '/react/api/drawer-container' },
-  { text: 'useDrawerly', link: '/react/api/use-drawerly' },
-  { text: 'useDrawer', link: '/react/api/use-drawer' },
-]
-
 const CORE_PACKAGE_GUIDE = [
   { text: 'Introduction', link: '/core/introduction' },
   { text: 'Getting Started', link: '/core/getting-started' },
@@ -64,10 +53,6 @@ const CORE_PACKAGE_CONCEPTS = [
   { text: 'Defining Drawers', link: '/core/concepts/defining-drawers' },
   { text: 'Managing the Stack', link: '/core/concepts/managing-stack' },
   { text: 'Styling', link: '/core/concepts/styling' },
-]
-
-const CORE_PACKAGE_API = [
-  { text: 'API Reference', link: '/core/api/' },
 ]
 
 export default defineConfig({
@@ -146,7 +131,7 @@ export default defineConfig({
         },
         {
           text: 'API',
-          items: VUE_PACKAGE_API,
+          items: vueApiSidebar,
         },
       ],
       '/react/': [
@@ -160,7 +145,7 @@ export default defineConfig({
         },
         {
           text: 'API',
-          items: REACT_PACKAGE_API,
+          items: reactApiSidebar,
         },
       ],
       '/core/': [
@@ -174,7 +159,7 @@ export default defineConfig({
         },
         {
           text: 'API',
-          items: CORE_PACKAGE_API,
+          items: coreApiSidebar,
         },
       ],
     },
